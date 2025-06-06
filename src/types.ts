@@ -1,0 +1,31 @@
+export interface Movie {
+    id: number;
+    title: string;
+    year: number | null;
+    poster_url: string | null;
+    overview: string | null;
+    rating: number | null;
+    review: string | null;
+    status: 'Watched' | 'Watching' | 'Want to Watch';
+    recommendation: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface TMDBMovie {
+    title: string;
+    year: string | null;
+    poster_url: string | null;
+    overview: string | null;
+}
+
+export interface MovieFormData {
+    title: string;
+    year: number | null;
+    poster_url: string | null;
+    overview: string | null;
+    rating: number | null;
+    review: string | null;
+    status: 'Watched' | 'Watching' | 'Want to Watch';
+    recommendation: string | null;
+} 
