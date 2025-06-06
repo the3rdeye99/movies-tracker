@@ -5,7 +5,6 @@ export interface Movie {
     poster_url: string | null;
     overview: string | null;
     rating: number | null;
-    review: string | null;
     status: 'Watched' | 'Watching' | 'Want to Watch';
     recommendation: string | null;
     created_at: string;
@@ -25,7 +24,6 @@ export interface MovieFormData {
     poster_url: string | null;
     overview: string | null;
     rating: number | null;
-    review: string | null;
     status: 'Watched' | 'Watching' | 'Want to Watch';
     recommendation: string | null;
 } 

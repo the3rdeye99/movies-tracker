@@ -28,7 +28,6 @@ const MovieForm: React.FC<MovieFormProps> = ({ onSubmit, initialData, isEditing 
         poster_url: null,
         overview: null,
         rating: null,
-        review: null,
         status: 'Want to Watch',
         recommendation: '',
         ...initialData,
@@ -146,17 +145,6 @@ const MovieForm: React.FC<MovieFormProps> = ({ onSubmit, initialData, isEditing 
                     onChange={(_, value) => setFormData(prev => ({ ...prev, rating: value }))}
                 />
             </Box>
-
-            <TextField
-                fullWidth
-                label="Review"
-                name="review"
-                multiline
-                rows={4}
-                value={formData.review || ''}
-                onChange={handleInputChange}
-                margin="normal"
-            />
 
             <TextField
                 fullWidth

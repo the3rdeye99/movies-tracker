@@ -368,44 +368,63 @@ def delete_tvshow(tvshow_id):
 @app.route('/api/tmdb/tv/recommendations', methods=['GET'])
 def get_tv_recommendations():
     try:
-        # Get popular TV shows from TMDB
-        response = requests.get(
-            f"{TMDB_BASE_URL}/tv/popular",
-            params={
-                'api_key': TMDB_API_KEY,
-                'language': 'en-US',
-                'page': 1
-            }
-        )
-        response.raise_for_status()
-        data = response.json()
+        # Get all TV shows from the user's watchlist
+        tvshows = TVShow.objects.all()
+        if not tvshows:
+            return jsonify({'error': 'No TV shows in watchlist to base recommendations on'}), 404
         
-        # Get 5 random shows from the results
-        shows = data.get('results', [])
-        if not shows:
-            return jsonify([])
+        # Get multiple random shows from the list (up to 3)
+        num_shows = min(3, len(tvshows))
+        random_shows = random.sample(list(tvshows), num_shows)
+        
+        all_recommendations = []
+        seen_titles = set()  # To avoid duplicates
+        
+        for random_show in random_shows:
+            # Search TMDB for the show to get its ID
+            search_response = requests.get(
+                f'{TMDB_BASE_URL}/search/tv',
+                params={
+                    'api_key': TMDB_API_KEY,
+                    'query': random_show.title
+                }
+            )
+            search_data = search_response.json()
             
-        # Get 5 random shows
-        selected_shows = random.sample(shows, min(5, len(shows)))
+            if not search_data.get('results'):
+                continue
+                
+            show_id = search_data['results'][0]['id']
+            
+            # Get recommendations based on the show
+            recommendations_response = requests.get(
+                f'{TMDB_BASE_URL}/tv/{show_id}/recommendations',
+                params={
+                    'api_key': TMDB_API_KEY,
+                    'page': random.randint(1, 3)  # Random page for more variety
+                }
+            )
+            recommendations_data = recommendations_response.json()
+            
+            # Format the recommendations
+            for show in recommendations_data.get('results', []):
+                if show['name'] not in seen_titles:
+                    seen_titles.add(show['name'])
+                    all_recommendations.append({
+                        'id': str(show['id']),  # Convert to string to match MongoDB ObjectId format
+                        'title': show['name'],
+                        'year': show['first_air_date'][:4] if show['first_air_date'] else None,
+                        'poster_url': f"https://image.tmdb.org/t/p/w500{show['poster_path']}" if show['poster_path'] else None,
+                        'overview': show['overview'],
+                        'rating': round(show['vote_average'] / 2)  # Convert 10-point scale to 5-point scale
+                    })
         
-        # Format the shows
-        formatted_shows = []
-        for show in selected_shows:
-            formatted_show = {
-                'id': show['id'],
-                'title': show['name'],
-                'year': show.get('first_air_date', '').split('-')[0] if show.get('first_air_date') else '',
-                'rating': show.get('vote_average', 0),
-                'overview': show.get('overview', ''),
-                'poster_url': f"https://image.tmdb.org/t/p/w500{show.get('poster_path', '')}" if show.get('poster_path') else None,
-                'status': 'Want to Watch'
-            }
-            formatted_shows.append(formatted_show)
-        
-        return jsonify(formatted_shows)
+        # Shuffle the recommendations and take top 10
+        random.shuffle(all_recommendations)
+        return jsonify(all_recommendations[:10])
     except Exception as e:
-        print(f"Error getting TV recommendations: {str(e)}")
-        return jsonify([])
+        logger.error(f"Error fetching TV recommendations: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True) 

@@ -35,11 +35,10 @@ const RecommendedMovies: React.FC<{ onMovieAdded: () => void }> = ({ onMovieAdde
         try {
             const movieData: MovieFormData = {
                 title: movie.title,
-                year: movie.year,
+                year: typeof movie.year === 'string' ? parseInt(movie.year) : movie.year,
                 rating: movie.rating,
-                status: 'Want to Watch',
+                status: 'Want to Watch' as const,
                 overview: movie.overview,
-                review: '',
                 recommendation: '',
                 poster_url: movie.poster_url
             };

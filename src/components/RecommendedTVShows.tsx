@@ -40,7 +40,6 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
             await addTVShow({
                 ...show,
                 status: 'Want to Watch',
-                review: '',
                 recommendation: ''
             });
             onShowAdded();
@@ -150,7 +149,7 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                             key={show.id}
                             sx={{
                                 flex: '0 0 auto',
-                                width: '200px'
+                                width: '320px'
                             }}
                         >
                             <MovieCard
