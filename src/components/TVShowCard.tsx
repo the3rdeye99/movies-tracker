@@ -23,9 +23,16 @@ interface TVShowCardProps {
     onEdit: (show: Movie) => void;
     onDelete: (id: number) => void;
     isRecommended?: boolean;
+    onShowClick?: (show: Movie) => void;
 }
 
-const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecommended = false }) => {
+const TVShowCard: React.FC<TVShowCardProps> = ({ 
+    show, 
+    onEdit, 
+    onDelete, 
+    isRecommended = false,
+    onShowClick 
+}) => {
     const [showDetails, setShowDetails] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -43,16 +50,28 @@ const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecom
     };
 
     const handleCardClick = (e: React.MouseEvent) => {
-        // Prevent opening details when clicking action buttons
-        if ((e.target as HTMLElement).closest('.action-buttons')) {
+        // Prevent opening details when clicking action buttons or their children
+        if ((e.target as HTMLElement).closest('.action-buttons') || 
+            (e.target as HTMLElement).closest('.MuiIconButton-root')) {
             return;
         }
-        setShowDetails(true);
+        if (onShowClick) {
+            onShowClick(show);
+        } else {
+            setShowDetails(true);
+        }
     };
 
     const handleDeleteClick = (e: React.MouseEvent) => {
+        e.preventDefault();
         e.stopPropagation();
         setShowDeleteConfirm(true);
+    };
+
+    const handleEditClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onEdit(show);
     };
 
     const handleConfirmDelete = () => {
@@ -64,6 +83,10 @@ const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecom
         setShowDeleteConfirm(false);
     };
 
+    const handleDetailsClose = () => {
+        setShowDetails(false);
+    };
+
     return (
         <>
             <Card 
@@ -71,7 +94,8 @@ const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecom
                     height: '100%', 
                     display: 'flex', 
                     flexDirection: 'column',
-                    maxWidth: { xs: '100%', sm: '320px' },
+                    width: '100%',
+                    maxWidth: { xs: '100%', sm: '400px' },
                     margin: '0 auto',
                     transition: 'transform 0.2s ease-in-out',
                     cursor: 'pointer',
@@ -83,7 +107,10 @@ const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecom
                 onClick={handleCardClick}
             >
                 {show.poster_url ? (
-                    <Box sx={{ height: { xs: 280, sm: 400 } }}>
+                    <Box sx={{ 
+                        height: { xs: 'auto', sm: 500 },
+                        aspectRatio: { xs: '2/3', sm: 'auto' }
+                    }}>
                         <CardMedia
                             component="img"
                             height="100%"
@@ -95,7 +122,8 @@ const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecom
                 ) : (
                     <Box
                         sx={{
-                            height: { xs: 280, sm: 400 },
+                            height: { xs: 'auto', sm: 500 },
+                            aspectRatio: { xs: '2/3', sm: 'auto' },
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -112,14 +140,14 @@ const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecom
                     position: 'relative', 
                     display: 'flex', 
                     flexDirection: 'column',
-                    p: { xs: 1, sm: 2 },
-                    minHeight: { xs: '100px', sm: '120px' }
+                    p: { xs: 2, sm: 3 },
+                    minHeight: { xs: 'auto', sm: '160px' }
                 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
                         <Typography variant="h6" component="div" sx={{ 
-                            fontSize: { xs: '1rem', sm: '1.2rem' },
+                            fontSize: { xs: '1.1rem', sm: '1.4rem' },
                             fontWeight: 'bold',
-                            height: { xs: '2em', sm: '2.4em' },
+                            height: { xs: 'auto', sm: '2.4em' },
                             overflow: 'hidden',
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
@@ -150,10 +178,7 @@ const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecom
                                 <>
                                     <IconButton 
                                         size="small" 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onEdit(show);
-                                        }}
+                                        onClick={handleEditClick}
                                     >
                                         <EditIcon />
                                     </IconButton>
@@ -190,7 +215,7 @@ const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecom
             <TVShowDetails
                 show={show}
                 open={showDetails}
-                onClose={() => setShowDetails(false)}
+                onClose={handleDetailsClose}
             />
             <Dialog
                 open={showDeleteConfirm}
