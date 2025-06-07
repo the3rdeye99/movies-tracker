@@ -16,16 +16,16 @@ import {
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { Movie } from '../types';
-import MovieDetails from './MovieDetails';
+import TVShowDetails from './TVShowDetails';
 
-interface MovieCardProps {
-    movie: Movie;
-    onEdit: (movie: Movie) => void;
+interface TVShowCardProps {
+    show: Movie;
+    onEdit: (show: Movie) => void;
     onDelete: (id: number) => void;
     isRecommended?: boolean;
 }
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecommended = false }) => {
+const TVShowCard: React.FC<TVShowCardProps> = ({ show, onEdit, onDelete, isRecommended = false }) => {
     const [showDetails, setShowDetails] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -56,7 +56,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
     };
 
     const handleConfirmDelete = () => {
-        onDelete(movie.id);
+        onDelete(show.id);
         setShowDeleteConfirm(false);
     };
 
@@ -82,12 +82,12 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                 }}
                 onClick={handleCardClick}
             >
-                {movie.poster_url ? (
+                {show.poster_url ? (
                     <CardMedia
                         component="img"
                         height="400"
-                        image={movie.poster_url}
-                        alt={movie.title}
+                        image={show.poster_url}
+                        alt={show.title}
                         sx={{ objectFit: 'cover' }}
                     />
                 ) : (
@@ -126,7 +126,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                             mr: 1,
                             lineHeight: '1.2em'
                         }}>
-                            {movie.title}
+                            {show.title}
                         </Typography>
                         <Box className="action-buttons" sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
                             {isRecommended ? (
@@ -134,7 +134,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                                     size="small" 
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onEdit(movie);
+                                        onEdit(show);
                                     }}
                                     sx={{ 
                                         bgcolor: 'primary.main',
@@ -150,7 +150,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                                         size="small" 
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onEdit(movie);
+                                            onEdit(show);
                                         }}
                                     >
                                         <EditIcon />
@@ -167,26 +167,26 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Rating value={movie.rating || 0} readOnly size="medium" />
-                        {movie.year && (
+                        <Rating value={show.rating || 0} readOnly size="medium" />
+                        {show.year && (
                             <Typography variant="body1" color="text.secondary" sx={{ ml: 1 }}>
-                                ({movie.year})
+                                ({show.year})
                             </Typography>
                         )}
                     </Box>
 
-                    {movie.status && !isRecommended && (
+                    {show.status && !isRecommended && (
                         <Chip 
-                            label={movie.status} 
+                            label={show.status} 
                             size="small" 
-                            color={getStatusColor(movie.status)}
+                            color={getStatusColor(show.status)}
                             sx={{ mb: 1 }}
                         />
                     )}
                 </CardContent>
             </Card>
-            <MovieDetails
-                movie={movie}
+            <TVShowDetails
+                show={show}
                 open={showDetails}
                 onClose={() => setShowDetails(false)}
             />
@@ -196,11 +196,11 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                 aria-labelledby="delete-dialog-title"
             >
                 <DialogTitle id="delete-dialog-title">
-                    Delete Movie
+                    Delete TV Show
                 </DialogTitle>
                 <DialogContent>
                     <Typography>
-                        Are you sure you want to delete "{movie.title}"? This action cannot be undone.
+                        Are you sure you want to delete "{show.title}"? This action cannot be undone.
                     </Typography>
                 </DialogContent>
                 <DialogActions>
@@ -216,4 +216,4 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
     );
 };
 
-export default MovieCard; 
+export default TVShowCard; 

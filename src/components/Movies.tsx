@@ -3,6 +3,7 @@ import { Box, Typography, Dialog, DialogTitle, DialogContent, IconButton } from 
 import { Close as CloseIcon } from '@mui/icons-material';
 import MovieList from './MovieList';
 import MovieForm from './MovieForm';
+import SearchComponent from './SearchComponent';
 import { Movie, MovieFormData } from '../types';
 import { getMovies, addMovie, updateMovie, deleteMovie } from '../services/api';
 import RecommendedMovies from './RecommendedMovies';
@@ -15,6 +16,7 @@ interface MoviesProps {
 
 const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }) => {
     const [movies, setMovies] = useState<Movie[]>([]);
+    const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
@@ -24,6 +26,7 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
             setLoading(true);
             const data = await getMovies();
             setMovies(data);
+            setFilteredMovies(data);
             setError(null);
         } catch (err) {
             setError('Failed to fetch movies');
@@ -36,6 +39,18 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
     useEffect(() => {
         fetchMovies();
     }, []);
+
+    const handleSearch = (query: string) => {
+        if (!query.trim()) {
+            setFilteredMovies(movies);
+            return;
+        }
+        const searchTerm = query.toLowerCase();
+        const filtered = movies.filter(movie => 
+            movie.title.toLowerCase().includes(searchTerm)
+        );
+        setFilteredMovies(filtered);
+    };
 
     const handleAddMovie = async (movieData: MovieFormData) => {
         try {
@@ -99,14 +114,15 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
     }
 
     return (
-        <Box>
-            {movies.length === 0 ? (
+        <Box sx={{ p: 3 }}>
+            <SearchComponent onSearch={handleSearch} />
+            {filteredMovies.length === 0 ? (
                 <Box sx={{ p: 4, textAlign: 'center' }}>
-                    <Typography>No movies added yet. Add your first movie!</Typography>
+                    <Typography>No movies found. Add your first movie!</Typography>
                 </Box>
             ) : (
                 <MovieList
-                    movies={movies}
+                    movies={filteredMovies}
                     onEdit={(movie) => {
                         setEditingMovie(movie);
                         onFormClose();
@@ -115,14 +131,14 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
                 />
             )}
             <RecommendedMovies onMovieAdded={fetchMovies} />
-            <Dialog
-                open={isFormOpen || editingMovie !== null}
+            <Dialog 
+                open={isFormOpen || editingMovie !== null} 
                 onClose={handleFormClose}
                 maxWidth="md"
                 fullWidth
             >
                 <DialogTitle>
-                    {editingMovie ? 'Edit Movie' : 'Add New Movie'}
+                    {editingMovie ? 'Update Movie' : 'Add Movie'}
                     <IconButton
                         aria-label="close"
                         onClick={handleFormClose}
@@ -137,9 +153,12 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
                 </DialogTitle>
                 <DialogContent>
                     <MovieForm
+                        open={isFormOpen || editingMovie !== null}
+                        onClose={handleFormClose}
                         onSubmit={editingMovie ? handleEditMovie : handleAddMovie}
                         initialData={editingMovie || undefined}
                         isEditing={!!editingMovie}
+                        onMovieAdded={fetchMovies}
                     />
                 </DialogContent>
             </Dialog>

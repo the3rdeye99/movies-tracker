@@ -50,6 +50,7 @@ class Movie(db.Document):
     review = db.StringField()
     status = db.StringField(default='Want to Watch')  # 'Watched', 'Watching', 'Want to Watch'
     recommendation = db.StringField()
+    tmdb_id = db.IntField()  # Add TMDB ID field
     created_at = db.DateTimeField(default=datetime.utcnow)
     updated_at = db.DateTimeField(default=datetime.utcnow)
 
@@ -64,6 +65,7 @@ class Movie(db.Document):
             'review': self.review,
             'status': self.status,
             'recommendation': self.recommendation,
+            'tmdb_id': self.tmdb_id,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
@@ -78,6 +80,7 @@ class TVShow(db.Document):
     review = db.StringField()
     status = db.StringField(default='Want to Watch')  # 'Watched', 'Watching', 'Want to Watch'
     recommendation = db.StringField()
+    tmdb_id = db.IntField()  # Add TMDB ID field
     created_at = db.DateTimeField(default=datetime.utcnow)
     updated_at = db.DateTimeField(default=datetime.utcnow)
 
@@ -92,6 +95,7 @@ class TVShow(db.Document):
             'review': self.review,
             'status': self.status,
             'recommendation': self.recommendation,
+            'tmdb_id': self.tmdb_id,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
@@ -119,10 +123,12 @@ def search_tmdb():
         if data.get('results'):
             movie = data['results'][0]  # Get the first result
             return jsonify({
+                'id': movie['id'],
                 'title': movie['title'],
                 'year': movie['release_date'][:4] if movie['release_date'] else None,
                 'poster_url': f"https://image.tmdb.org/t/p/w500{movie['poster_path']}" if movie['poster_path'] else None,
-                'overview': movie['overview']
+                'overview': movie['overview'],
+                'tmdb_id': movie['id']  # Add TMDB ID to response
             })
         return jsonify({'error': 'No results found'}), 404
     except Exception as e:
@@ -168,7 +174,8 @@ def add_movie():
             rating=data.get('rating'),
             review=data.get('review'),
             status=data.get('status', 'Want to Watch'),
-            recommendation=data.get('recommendation')
+            recommendation=data.get('recommendation'),
+            tmdb_id=data.get('tmdb_id')
         )
         movie.save()
         return jsonify(movie.to_dict()), 201
@@ -299,10 +306,12 @@ def search_tmdb_tv():
         if data.get('results'):
             show = data['results'][0]  # Get the first result
             return jsonify({
+                'id': show['id'],
                 'title': show['name'],
                 'year': show['first_air_date'][:4] if show['first_air_date'] else None,
                 'poster_url': f"https://image.tmdb.org/t/p/w500{show['poster_path']}" if show['poster_path'] else None,
-                'overview': show['overview']
+                'overview': show['overview'],
+                'tmdb_id': show['id']  # Add TMDB ID to response
             })
         return jsonify({'error': 'No results found'}), 404
     except Exception as e:
@@ -328,7 +337,8 @@ def add_tvshow():
             rating=data.get('rating'),
             review=data.get('review'),
             status=data.get('status', 'Want to Watch'),
-            recommendation=data.get('recommendation')
+            recommendation=data.get('recommendation'),
+            tmdb_id=data.get('tmdb_id')
         )
         tvshow.save()
         return jsonify(tvshow.to_dict()), 201
@@ -424,6 +434,95 @@ def get_tv_recommendations():
         return jsonify(all_recommendations[:10])
     except Exception as e:
         logger.error(f"Error fetching TV recommendations: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/tmdb/<type>/<id>/trailer', methods=['GET'])
+def get_trailer(type, id):
+    try:
+        if type == 'movie':
+            response = requests.get(
+                f'{TMDB_BASE_URL}/movie/{id}/videos',
+                params={
+                    'api_key': TMDB_API_KEY
+                }
+            )
+            data = response.json()
+            
+            if data.get('results'):
+                # Find the first trailer
+                trailer = next((video for video in data['results'] 
+                              if video['type'] == 'Trailer' and video['site'] == 'YouTube'), None)
+                if trailer:
+                    return jsonify({
+                        'key': trailer['key'],
+                        'site': trailer['site']
+                    })
+            return jsonify({'error': 'No trailer found'}), 404
+
+        elif type == 'tv':
+            # First try to get the show's videos
+            response = requests.get(
+                f'{TMDB_BASE_URL}/tv/{id}/videos',
+                params={
+                    'api_key': TMDB_API_KEY
+                }
+            )
+            data = response.json()
+            
+            if data.get('results'):
+                # Find the first trailer
+                trailer = next((video for video in data['results'] 
+                              if video['type'] == 'Trailer' and video['site'] == 'YouTube'), None)
+                if trailer:
+                    return jsonify({
+                        'key': trailer['key'],
+                        'site': trailer['site']
+                    })
+
+            # If no show trailer found, try to get season 1 trailer
+            season_response = requests.get(
+                f'{TMDB_BASE_URL}/tv/{id}/season/1/videos',
+                params={
+                    'api_key': TMDB_API_KEY
+                }
+            )
+            season_data = season_response.json()
+            
+            if season_data.get('results'):
+                # Find the first trailer from season 1
+                season_trailer = next((video for video in season_data['results'] 
+                                    if video['type'] == 'Trailer' and video['site'] == 'YouTube'), None)
+                if season_trailer:
+                    return jsonify({
+                        'key': season_trailer['key'],
+                        'site': season_trailer['site']
+                    })
+
+            # If still no trailer found, try to get episode 1 trailer
+            episode_response = requests.get(
+                f'{TMDB_BASE_URL}/tv/{id}/season/1/episode/1/videos',
+                params={
+                    'api_key': TMDB_API_KEY
+                }
+            )
+            episode_data = episode_response.json()
+            
+            if episode_data.get('results'):
+                # Find the first trailer from episode 1
+                episode_trailer = next((video for video in episode_data['results'] 
+                                    if video['type'] == 'Trailer' and video['site'] == 'YouTube'), None)
+                if episode_trailer:
+                    return jsonify({
+                        'key': episode_trailer['key'],
+                        'site': episode_trailer['site']
+                    })
+
+            return jsonify({'error': 'No trailer found'}), 404
+        else:
+            return jsonify({'error': 'Invalid type. Must be "movie" or "tv"'}), 400
+
+    except Exception as e:
+        logger.error(f"Error fetching trailer: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

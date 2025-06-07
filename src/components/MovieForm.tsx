@@ -1,27 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
     TextField,
     Button,
     FormControl,
     InputLabel,
     Select,
     MenuItem,
-    Rating,
+    Box,
     Typography,
     CircularProgress,
+    Rating,
     SelectChangeEvent,
+    InputAdornment,
+    IconButton,
 } from '@mui/material';
-import { MovieFormData, TMDBMovie } from '../types';
-import { searchTMDB } from '../services/api';
+import { Movie, MovieFormData } from '../types';
+import { searchTMDB, addMovie } from '../services/api';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface MovieFormProps {
-    onSubmit: (data: MovieFormData) => void;
-    initialData?: MovieFormData;
+    open: boolean;
+    onClose: () => void;
+    onSubmit: (movieData: MovieFormData) => Promise<void>;
+    initialData?: Movie;
     isEditing?: boolean;
+    onMovieAdded: () => void;
 }
 
-const MovieForm: React.FC<MovieFormProps> = ({ onSubmit, initialData, isEditing = false }) => {
+const MovieForm: React.FC<MovieFormProps> = ({ 
+    open, 
+    onClose, 
+    onSubmit, 
+    initialData, 
+    isEditing = false,
+    onMovieAdded 
+}) => {
     const [formData, setFormData] = useState<MovieFormData>({
         title: '',
         year: null,
@@ -30,50 +47,15 @@ const MovieForm: React.FC<MovieFormProps> = ({ onSubmit, initialData, isEditing 
         rating: null,
         status: 'Want to Watch',
         recommendation: '',
+        type: 'movie',
         ...initialData,
     });
 
     const [isSearching, setIsSearching] = useState(false);
-    const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        return () => {
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-        };
-    }, [searchTimeout]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-
-        if (name === 'title' && !isEditing) {
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-
-            const timeout = setTimeout(async () => {
-                if (value) {
-                    setIsSearching(true);
-                    try {
-                        const tmdbData = await searchTMDB(value);
-                        setFormData(prev => ({
-                            ...prev,
-                            year: tmdbData.year ? parseInt(tmdbData.year) : null,
-                            poster_url: tmdbData.poster_url,
-                            overview: tmdbData.overview,
-                        }));
-                    } catch (error) {
-                        console.error('Error fetching TMDB data:', error);
-                    } finally {
-                        setIsSearching(false);
-                    }
-                }
-            }, 500);
-
-            setSearchTimeout(timeout);
-        }
     };
 
     const handleSelectChange = (e: SelectChangeEvent) => {
@@ -81,9 +63,46 @@ const MovieForm: React.FC<MovieFormProps> = ({ onSubmit, initialData, isEditing 
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSearch = async () => {
+        if (!formData.title || isEditing) return;
+
+        setIsSearching(true);
+        try {
+            const tmdbData = await searchTMDB(formData.title);
+            setFormData(prev => ({
+                ...prev,
+                title: tmdbData.title || prev.title,
+                year: tmdbData.year ? parseInt(tmdbData.year) : null,
+                poster_url: tmdbData.poster_url,
+                overview: tmdbData.overview,
+            }));
+        } catch (error) {
+            console.error('Error fetching TMDB data:', error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        try {
+            const movieData: MovieFormData = {
+                title: formData.title,
+                year: formData.year,
+                rating: formData.rating,
+                status: formData.status,
+                overview: formData.overview,
+                recommendation: formData.recommendation,
+                poster_url: formData.poster_url,
+                type: 'movie',
+                tmdb_id: formData.tmdb_id
+            };
+            await onSubmit(movieData);
+            onMovieAdded();
+            onClose();
+        } catch (error) {
+            console.error('Error adding movie:', error);
+        }
     };
 
     return (
@@ -96,15 +115,21 @@ const MovieForm: React.FC<MovieFormProps> = ({ onSubmit, initialData, isEditing 
                 onChange={handleInputChange}
                 required
                 margin="normal"
-                disabled={isSearching}
+                disabled={isSearching || isEditing}
+                InputProps={{
+                    endAdornment: !isEditing && (
+                        <InputAdornment position="end">
+                            <IconButton
+                                onClick={handleSearch}
+                                disabled={isSearching || !formData.title}
+                                edge="end"
+                            >
+                                {isSearching ? <CircularProgress size={20} /> : <SearchIcon />}
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                }}
             />
-
-            {isSearching && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <CircularProgress size={20} />
-                    <Typography>Searching TMDB...</Typography>
-                </Box>
-            )}
 
             {formData.poster_url && (
                 <Box sx={{ mb: 2, textAlign: 'center' }}>

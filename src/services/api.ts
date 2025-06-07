@@ -136,4 +136,24 @@ export const getRecommendedTVShows = async (): Promise<Movie[]> => {
         console.error('Error fetching recommended TV shows:', error);
         return [];
     }
+};
+
+export const getMovieTrailer = async (movieId: string, type: 'movie' | 'tv'): Promise<{ key: string; site: string }> => {
+    try {
+        const response = await api.get(`/api/tmdb/${type}/${movieId}/trailer`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching movie trailer:', error);
+        throw error;
+    }
+};
+
+export const getTVShowTrailer = async (tvId: string, type: 'movie' | 'tv'): Promise<{ key: string; site: string }> => {
+    try {
+        const response = await api.get(`/api/tmdb/${type}/${tvId}/trailer`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching TV show trailer:', error);
+        throw error;
+    }
 }; 

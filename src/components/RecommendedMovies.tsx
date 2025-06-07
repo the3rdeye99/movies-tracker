@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, IconButton, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Typography, IconButton, useTheme, useMediaQuery, Snackbar, Alert } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import MovieCard from './MovieCard';
 import { Movie, MovieFormData } from '../types';
-import { getRecommendedMovies, addMovie } from '../services/api';
+import { getRecommendedMovies, addMovie, getMovies } from '../services/api';
 
 const RecommendedMovies: React.FC<{ onMovieAdded: () => void }> = ({ onMovieAdded }) => {
     const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]);
+    const [currentMovies, setCurrentMovies] = useState<Movie[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -27,30 +33,71 @@ const RecommendedMovies: React.FC<{ onMovieAdded: () => void }> = ({ onMovieAdde
         }
     };
 
+    const fetchCurrentMovies = async () => {
+        try {
+            const movies = await getMovies();
+            setCurrentMovies(movies);
+        } catch (err) {
+            console.error('Error fetching current movies:', err);
+        }
+    };
+
     useEffect(() => {
         fetchRecommendedMovies();
+        fetchCurrentMovies();
     }, []);
 
     const handleAdd = async (movie: Movie) => {
         try {
+            // Check if movie already exists
+            const movieExists = currentMovies.some(
+                m => m.title.toLowerCase() === movie.title.toLowerCase()
+            );
+
+            if (movieExists) {
+                setSnackbar({
+                    open: true,
+                    message: 'This movie is already in your list!',
+                    severity: 'error'
+                });
+                return;
+            }
+
             const movieData: MovieFormData = {
                 title: movie.title,
                 year: typeof movie.year === 'string' ? parseInt(movie.year) : movie.year,
                 rating: movie.rating,
                 status: 'Want to Watch' as const,
                 overview: movie.overview,
-                recommendation: '',
-                poster_url: movie.poster_url
+                recommendation: movie.recommendation,
+                poster_url: movie.poster_url,
+                type: 'movie'
             };
             await addMovie(movieData);
             // Remove the added movie from recommendations
             setRecommendedMovies(prev => prev.filter(m => m.id !== movie.id));
             // Fetch a new recommendation
             fetchRecommendedMovies();
+            // Update current movies list
+            fetchCurrentMovies();
             onMovieAdded();
+            setSnackbar({
+                open: true,
+                message: 'Movie added successfully!',
+                severity: 'success'
+            });
         } catch (error) {
             console.error('Error adding movie:', error);
+            setSnackbar({
+                open: true,
+                message: 'Failed to add movie. Please try again.',
+                severity: 'error'
+            });
         }
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
     };
 
     const handleScroll = (direction: 'left' | 'right') => {
@@ -156,6 +203,16 @@ const RecommendedMovies: React.FC<{ onMovieAdded: () => void }> = ({ onMovieAdde
                     ))}
                 </Box>
             </Box>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

@@ -1,27 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
     TextField,
     Button,
     FormControl,
     InputLabel,
     Select,
     MenuItem,
-    Rating,
+    Box,
     Typography,
-    CircularProgress,
-    SelectChangeEvent,
+    CircularProgress
 } from '@mui/material';
+import { Movie, MovieFormData } from '../types';
 import { searchTMDBTV, addTVShow } from '../services/api';
-import { Movie, MovieFormData, TMDBMovie } from '../types';
+import {
+    Rating,
+    SelectChangeEvent,
+    InputAdornment,
+    IconButton,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface TVShowFormProps {
-    onSubmit: (data: MovieFormData) => Promise<void>;
+    open: boolean;
+    onClose: () => void;
+    onSubmit: (showData: MovieFormData) => Promise<void>;
     initialData?: Movie;
     isEditing?: boolean;
+    onShowAdded: () => void;
 }
 
-const TVShowForm: React.FC<TVShowFormProps> = ({ onSubmit, initialData, isEditing = false }) => {
+const TVShowForm: React.FC<TVShowFormProps> = ({ 
+    open, 
+    onClose, 
+    onSubmit, 
+    initialData, 
+    isEditing = false,
+    onShowAdded 
+}) => {
     const [formData, setFormData] = useState<MovieFormData>({
         title: '',
         year: null,
@@ -30,50 +49,15 @@ const TVShowForm: React.FC<TVShowFormProps> = ({ onSubmit, initialData, isEditin
         rating: null,
         status: 'Want to Watch',
         recommendation: '',
+        type: 'tv',
         ...initialData,
     });
 
     const [isSearching, setIsSearching] = useState(false);
-    const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        return () => {
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-        };
-    }, [searchTimeout]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-
-        if (name === 'title' && !isEditing) {
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-
-            const timeout = setTimeout(async () => {
-                if (value) {
-                    setIsSearching(true);
-                    try {
-                        const tmdbData = await searchTMDBTV(value);
-                        setFormData(prev => ({
-                            ...prev,
-                            year: tmdbData.year ? parseInt(tmdbData.year) : null,
-                            poster_url: tmdbData.poster_url,
-                            overview: tmdbData.overview,
-                        }));
-                    } catch (error) {
-                        console.error('Error fetching TMDB data:', error);
-                    } finally {
-                        setIsSearching(false);
-                    }
-                }
-            }, 500);
-
-            setSearchTimeout(timeout);
-        }
     };
 
     const handleSelectChange = (e: SelectChangeEvent) => {
@@ -81,104 +65,155 @@ const TVShowForm: React.FC<TVShowFormProps> = ({ onSubmit, initialData, isEditin
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleSearch = async () => {
+        if (!formData.title || isEditing) return;
+
+        setIsSearching(true);
+        try {
+            const tmdbData = await searchTMDBTV(formData.title);
+            setFormData(prev => ({
+                ...prev,
+                title: tmdbData.title || prev.title,
+                year: tmdbData.year ? parseInt(tmdbData.year) : null,
+                poster_url: tmdbData.poster_url,
+                overview: tmdbData.overview,
+            }));
+        } catch (error) {
+            console.error('Error fetching TMDB data:', error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await onSubmit(formData);
+        try {
+            const showData: MovieFormData = {
+                title: formData.title,
+                year: formData.year,
+                rating: formData.rating,
+                status: formData.status,
+                overview: formData.overview,
+                recommendation: formData.recommendation,
+                poster_url: formData.poster_url,
+                type: 'tv',
+                tmdb_id: formData.tmdb_id
+            };
+            await onSubmit(showData);
+            onShowAdded();
+            onClose();
+        } catch (error) {
+            console.error('Error adding TV show:', error);
+        }
     };
 
     return (
-        <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
-            <TextField
-                fullWidth
-                label="TV Show Title"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                required
-                margin="normal"
-                disabled={isSearching}
-            />
-
-            {isSearching && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <CircularProgress size={20} />
-                    <Typography>Searching TMDB...</Typography>
-                </Box>
-            )}
-
-            {formData.poster_url && (
-                <Box sx={{ mb: 2, textAlign: 'center' }}>
-                    <img
-                        src={formData.poster_url}
-                        alt={formData.title}
-                        style={{ maxWidth: '200px', maxHeight: '300px' }}
+        <Dialog open={open} onClose={onClose}>
+            <DialogTitle>{isEditing ? 'Update TV Show' : 'Add TV Show'}</DialogTitle>
+            <DialogContent>
+                <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
+                    <TextField
+                        fullWidth
+                        label="TV Show Title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleInputChange}
+                        required
+                        margin="normal"
+                        disabled={isSearching || isEditing}
+                        InputProps={{
+                            endAdornment: !isEditing && (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={handleSearch}
+                                        disabled={isSearching || !formData.title}
+                                        edge="end"
+                                    >
+                                        {isSearching ? <CircularProgress size={20} /> : <SearchIcon />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
+
+                    {formData.poster_url && (
+                        <Box sx={{ mb: 2, textAlign: 'center' }}>
+                            <img
+                                src={formData.poster_url}
+                                alt={formData.title}
+                                style={{ maxWidth: '200px', maxHeight: '300px' }}
+                            />
+                        </Box>
+                    )}
+
+                    <TextField
+                        fullWidth
+                        label="Year"
+                        name="year"
+                        type="number"
+                        value={formData.year || ''}
+                        onChange={handleInputChange}
+                        margin="normal"
+                    />
+
+                    <TextField
+                        fullWidth
+                        label="Overview"
+                        name="overview"
+                        multiline
+                        rows={4}
+                        value={formData.overview || ''}
+                        onChange={handleInputChange}
+                        margin="normal"
+                    />
+
+                    <Box sx={{ my: 2 }}>
+                        <Typography component="legend">Rating</Typography>
+                        <Rating
+                            name="rating"
+                            value={formData.rating || 0}
+                            onChange={(_, value) => setFormData(prev => ({ ...prev, rating: value }))}
+                        />
+                    </Box>
+
+                    <TextField
+                        fullWidth
+                        label="Recommendation"
+                        name="recommendation"
+                        value={formData.recommendation || ''}
+                        onChange={handleInputChange}
+                        margin="normal"
+                    />
+
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                            name="status"
+                            value={formData.status}
+                            onChange={handleSelectChange}
+                            label="Status"
+                        >
+                            <MenuItem value="Want to Watch">Want to Watch</MenuItem>
+                            <MenuItem value="Watching">Watching</MenuItem>
+                            <MenuItem value="Watched">Watched</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    >
+                        {isEditing ? 'Update TV Show' : 'Add TV Show'}
+                    </Button>
                 </Box>
-            )}
-
-            <TextField
-                fullWidth
-                label="Year"
-                name="year"
-                type="number"
-                value={formData.year || ''}
-                onChange={handleInputChange}
-                margin="normal"
-            />
-
-            <TextField
-                fullWidth
-                label="Overview"
-                name="overview"
-                multiline
-                rows={4}
-                value={formData.overview || ''}
-                onChange={handleInputChange}
-                margin="normal"
-            />
-
-            <Box sx={{ my: 2 }}>
-                <Typography component="legend">Rating</Typography>
-                <Rating
-                    name="rating"
-                    value={formData.rating || 0}
-                    onChange={(_, value) => setFormData(prev => ({ ...prev, rating: value }))}
-                />
-            </Box>
-
-            <TextField
-                fullWidth
-                label="Recommendation"
-                name="recommendation"
-                value={formData.recommendation || ''}
-                onChange={handleInputChange}
-                margin="normal"
-            />
-
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Status</InputLabel>
-                <Select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleSelectChange}
-                    label="Status"
-                >
-                    <MenuItem value="Want to Watch">Want to Watch</MenuItem>
-                    <MenuItem value="Watching">Watching</MenuItem>
-                    <MenuItem value="Watched">Watched</MenuItem>
-                </Select>
-            </FormControl>
-
-            <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                fullWidth
-                sx={{ mt: 2 }}
-            >
-                {isEditing ? 'Update TV Show' : 'Add TV Show'}
-            </Button>
-        </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Cancel</Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 
