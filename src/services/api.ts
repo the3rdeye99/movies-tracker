@@ -136,7 +136,7 @@ export const getRecommendedTVShows = async (): Promise<Movie[]> => {
         console.error('Error fetching recommended TV shows:', error);
         return [];
     }
-};
+}; 
 
 export const getMovieTrailer = async (movieId: string, type: 'movie' | 'tv'): Promise<{ key: string; site: string }> => {
     try {

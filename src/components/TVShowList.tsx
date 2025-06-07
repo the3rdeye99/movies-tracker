@@ -27,20 +27,28 @@ const TVShowList: React.FC<TVShowListProps> = ({ shows, onEdit, onDelete, onShow
                 sx={{
                     display: 'grid',
                     gridTemplateColumns: {
-                        xs: '1fr',
+                        xs: 'repeat(2, 1fr)',
                         sm: 'repeat(2, 1fr)',
                         md: 'repeat(3, 1fr)',
                         xl: 'repeat(5, 1fr)'
                     },
-                    gap: 3,
-                    width: '100%'
+                    gap: { xs: 1, sm: 2, md: 3 },
+                    width: '100%',
+                    justifyContent: 'center',
+                    '& > *': {
+                        display: 'flex',
+                        justifyContent: 'center'
+                    }
                 }}
             >
                 {shows.map((show) => (
                     <Box 
                         key={show.id}
+                        sx={{ 
+                            width: '100%',
+                            cursor: onShowClick ? 'pointer' : 'default'
+                        }}
                         onClick={() => onShowClick?.(show)}
-                        sx={{ cursor: onShowClick ? 'pointer' : 'default' }}
                     >
                         <TVShowCard
                             show={show}

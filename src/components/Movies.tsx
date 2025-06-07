@@ -114,7 +114,7 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
     }
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: { xs: 0, sm: 3 } }}>
             <SearchComponent onSearch={handleSearch} />
             {filteredMovies.length === 0 ? (
                 <Box sx={{ p: 4, textAlign: 'center' }}>
@@ -131,8 +131,8 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
                 />
             )}
             <RecommendedMovies onMovieAdded={fetchMovies} />
-            <Dialog 
-                open={isFormOpen || editingMovie !== null} 
+            <Dialog
+                open={isFormOpen || editingMovie !== null}
                 onClose={handleFormClose}
                 maxWidth="md"
                 fullWidth

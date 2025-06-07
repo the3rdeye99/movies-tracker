@@ -155,7 +155,7 @@ const TVShows: React.FC = () => {
     }
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: { xs: 0, sm: 3 } }}>
             <SearchComponent onSearch={handleSearch} />
             {filteredShows.length === 0 ? (
                 <Typography align="center" color="text.secondary" sx={{ mt: 4 }}>

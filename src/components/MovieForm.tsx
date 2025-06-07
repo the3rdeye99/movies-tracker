@@ -66,21 +66,21 @@ const MovieForm: React.FC<MovieFormProps> = ({
     const handleSearch = async () => {
         if (!formData.title || isEditing) return;
 
-        setIsSearching(true);
-        try {
+                    setIsSearching(true);
+                    try {
             const tmdbData = await searchTMDB(formData.title);
-            setFormData(prev => ({
-                ...prev,
+                        setFormData(prev => ({
+                            ...prev,
                 title: tmdbData.title || prev.title,
-                year: tmdbData.year ? parseInt(tmdbData.year) : null,
-                poster_url: tmdbData.poster_url,
-                overview: tmdbData.overview,
-            }));
-        } catch (error) {
-            console.error('Error fetching TMDB data:', error);
-        } finally {
-            setIsSearching(false);
-        }
+                            year: tmdbData.year ? parseInt(tmdbData.year) : null,
+                            poster_url: tmdbData.poster_url,
+                            overview: tmdbData.overview,
+                        }));
+                    } catch (error) {
+                        console.error('Error fetching TMDB data:', error);
+                    } finally {
+                        setIsSearching(false);
+                    }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

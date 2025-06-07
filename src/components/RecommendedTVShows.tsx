@@ -163,27 +163,27 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                     No recommendations available at the moment.
                 </Typography>
             ) : (
-                <Box sx={{ position: 'relative' }}>
-                    <Box
-                        ref={scrollContainerRef}
-                        sx={{
-                            display: 'flex',
-                            overflowX: 'auto',
+            <Box sx={{ position: 'relative' }}>
+                <Box
+                    ref={scrollContainerRef}
+                    sx={{
+                        display: 'flex',
+                        overflowX: 'auto',
                             scrollBehavior: 'smooth',
                             scrollbarWidth: 'none',
                             msOverflowStyle: 'none',
-                            '&::-webkit-scrollbar': {
-                                display: 'none'
-                            },
+                        '&::-webkit-scrollbar': {
+                            display: 'none'
+                        },
                             gap: 3,
                             pb: 2
-                        }}
-                    >
-                        {recommendations.map((show) => (
-                            <Box
-                                key={show.id}
-                                sx={{
-                                    flex: '0 0 auto',
+                    }}
+                >
+                    {recommendations.map((show) => (
+                        <Box
+                            key={show.id}
+                            sx={{
+                                flex: '0 0 auto',
                                     width: {
                                         xs: '100%',
                                         sm: 'calc(50% - 12px)',
@@ -191,17 +191,17 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                                         lg: 'calc(25% - 18px)',
                                         xl: 'calc(20% - 19.2px)'
                                     }
-                                }}
-                            >
+                            }}
+                        >
                                 <TVShowCard
                                     show={show}
-                                    onEdit={handleAdd}
-                                    onDelete={() => {}}
-                                    isRecommended={true}
-                                />
-                            </Box>
-                        ))}
-                    </Box>
+                                onEdit={handleAdd}
+                                onDelete={() => {}}
+                                isRecommended={true}
+                            />
+                        </Box>
+                    ))}
+                </Box>
                     {!isMobile && (
                         <>
                             <IconButton
@@ -240,7 +240,7 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                             </IconButton>
                         </>
                     )}
-                </Box>
+            </Box>
             )}
             <Snackbar
                 open={snackbar.open}

@@ -75,48 +75,48 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie, open, onClose }) => 
 
     return (
         <>
-            <Dialog 
-                open={open} 
-                onClose={onClose}
-                maxWidth="md"
-                fullWidth
-                PaperProps={{
-                    sx: {
-                        bgcolor: 'background.paper',
-                        backgroundImage: 'none',
+        <Dialog 
+            open={open} 
+            onClose={onClose}
+            maxWidth="md"
+            fullWidth
+            PaperProps={{
+                sx: {
+                    bgcolor: 'background.paper',
+                    backgroundImage: 'none',
                         maxHeight: '90vh',
-                    }
-                }}
-            >
+                }
+            }}
+        >
                 <DialogTitle sx={{ py: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                         <Typography variant="h5" component="h1">
-                            {movie.title}
-                        </Typography>
-                        {movie.year && (
-                            <Typography variant="subtitle1" color="text.secondary">
-                                ({movie.year})
-                            </Typography>
-                        )}
+                    {movie.title}
+                </Typography>
+                {movie.year && (
+                    <Typography variant="subtitle1" color="text.secondary">
+                        ({movie.year})
+                    </Typography>
+                )}
                     </Box>
-                </DialogTitle>
+            </DialogTitle>
                 <DialogContent sx={{ p: 1.5 }}>
                     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 1.5 }}>
                         <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 33%' }, position: 'relative' }}>
-                            {movie.poster_url ? (
+                        {movie.poster_url ? (
                                 <Box sx={{ position: 'relative' }}>
-                                    <Box
-                                        component="img"
-                                        src={movie.poster_url}
-                                        alt={movie.title}
-                                        sx={{
-                                            width: '100%',
-                                            height: 'auto',
-                                            borderRadius: 1,
+                            <Box
+                                component="img"
+                                src={movie.poster_url}
+                                alt={movie.title}
+                                sx={{
+                                    width: '100%',
+                                    height: 'auto',
+                                    borderRadius: 1,
                                             boxShadow: 3,
                                             maxHeight: '50vh'
-                                        }}
-                                    />
+                                }}
+                            />
                                     <IconButton
                                         onClick={handleTrailerClick}
                                         disabled={isLoadingTrailer}
@@ -136,70 +136,70 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie, open, onClose }) => 
                                         <PlayCircleOutlineIcon sx={{ fontSize: 32 }} />
                                     </IconButton>
                                 </Box>
-                            ) : (
-                                <Box
-                                    sx={{
-                                        width: '100%',
+                        ) : (
+                            <Box
+                                sx={{
+                                    width: '100%',
                                         height: 250,
-                                        bgcolor: 'grey.200',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        borderRadius: 1
-                                    }}
-                                >
-                                    <Typography color="text.secondary">
-                                        No Image Available
-                                    </Typography>
-                                </Box>
-                            )}
-                        </Box>
-                        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 67%' } }}>
+                                    bgcolor: 'grey.200',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: 1
+                                }}
+                            >
+                                <Typography color="text.secondary">
+                                    No Image Available
+                                </Typography>
+                            </Box>
+                        )}
+                    </Box>
+                    <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 67%' } }}>
                             <Box sx={{ mb: 0.5 }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                                     <Rating value={movie.rating || 0} readOnly size="small" />
-                                    {movie.rating && (
+                                {movie.rating && (
                                         <Typography variant="body2" sx={{ ml: 0.5 }}>
-                                            ({movie.rating}/5)
-                                        </Typography>
-                                    )}
-                                </Box>
-                                {movie.status && (
-                                    <Chip 
-                                        label={movie.status} 
-                                        color={
-                                            movie.status === 'Watched' ? 'success' :
-                                            movie.status === 'Watching' ? 'primary' :
-                                            'default'
-                                        }
-                                        size="small"
-                                        sx={{ mb: 0.5 }}
-                                    />
+                                        ({movie.rating}/5)
+                                    </Typography>
                                 )}
                             </Box>
-                            <Typography variant="subtitle1" component="h2" gutterBottom>
-                                Overview
-                            </Typography>
-                            <Typography variant="body2" paragraph sx={{ mb: 1 }}>
-                                {movie.overview}
-                            </Typography>
-                            {movie.recommendation && (
-                                <>
-                                    <Typography variant="subtitle1" component="h2" gutterBottom>
-                                        Recommendation
-                                    </Typography>
-                                    <Typography variant="body2" paragraph>
-                                        {movie.recommendation}
-                                    </Typography>
-                                </>
+                            {movie.status && (
+                                <Chip 
+                                    label={movie.status} 
+                                    color={
+                                        movie.status === 'Watched' ? 'success' :
+                                        movie.status === 'Watching' ? 'primary' :
+                                        'default'
+                                    }
+                                        size="small"
+                                        sx={{ mb: 0.5 }}
+                                />
                             )}
                         </Box>
+                            <Typography variant="subtitle1" component="h2" gutterBottom>
+                            Overview
+                        </Typography>
+                            <Typography variant="body2" paragraph sx={{ mb: 1 }}>
+                            {movie.overview}
+                        </Typography>
+                        {movie.recommendation && (
+                            <>
+                                    <Typography variant="subtitle1" component="h2" gutterBottom>
+                                    Recommendation
+                                </Typography>
+                                    <Typography variant="body2" paragraph>
+                                    {movie.recommendation}
+                                </Typography>
+                            </>
+                        )}
                     </Box>
-                </DialogContent>
+                </Box>
+            </DialogContent>
                 <DialogActions sx={{ px: 1.5, py: 0.5 }}>
                     <Button onClick={onClose} size="small">Close</Button>
-                </DialogActions>
-            </Dialog>
+            </DialogActions>
+        </Dialog>
 
             {/* Trailer Modal */}
             <Dialog

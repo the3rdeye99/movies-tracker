@@ -35,7 +35,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onSearch }) => {
         <Paper 
             elevation={3} 
             sx={{ 
-                p: 2, 
+                p: { xs: 1, sm: 2 }, 
                 mb: 3, 
                 borderRadius: 2,
                 position: 'sticky',
@@ -43,10 +43,14 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onSearch }) => {
                 zIndex: 1000,
                 backdropFilter: 'blur(8px)',
                 backgroundColor: 'rgba(18, 18, 18, 0.8)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.12)'
+                borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+                width: { xs: 'calc(100% - 8px)', sm: '95%', md: '90%' },
+                mx: 'auto',
+                maxWidth: '1400px',
+                px: { xs: 0.5, sm: 2 }
             }}
         >
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
                 <TextField
                     fullWidth
                     placeholder="Search your list..."

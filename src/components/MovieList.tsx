@@ -26,17 +26,22 @@ const MovieList: React.FC<MovieListProps> = ({ movies, onEdit, onDelete }) => {
                 sx={{
                     display: 'grid',
                     gridTemplateColumns: {
-                        xs: '1fr',
+                        xs: 'repeat(2, 1fr)',
                         sm: 'repeat(2, 1fr)',
                         md: 'repeat(3, 1fr)',
                         xl: 'repeat(5, 1fr)'
                     },
-                    gap: 3,
-                    width: '100%'
+                    gap: { xs: 1, sm: 2, md: 3 },
+                    width: '100%',
+                    justifyContent: 'center',
+                    '& > *': {
+                        display: 'flex',
+                        justifyContent: 'center'
+                    }
                 }}
             >
                 {movies.map((movie) => (
-                    <Box key={movie.id}>
+                    <Box key={movie.id} sx={{ width: '100%' }}>
                         <MovieCard
                             movie={movie}
                             onEdit={onEdit}

@@ -126,10 +126,10 @@ function App() {
                                 </Menu>
                             </>
                         ) : (
-                            <Tabs value={activeTab} onChange={handleTabChange} sx={{ mr: 2 }}>
+                        <Tabs value={activeTab} onChange={handleTabChange} sx={{ mr: 2 }}>
                                 <Tab label="Movies" value="movies" />
                                 <Tab label="TV Shows" value="tvshows" />
-                            </Tabs>
+                        </Tabs>
                         )}
 
                         {activeTab === 'movies' ? (
@@ -146,14 +146,14 @@ function App() {
                                     <AddIcon />
                                 </IconButton>
                             ) : (
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    startIcon={<AddIcon />}
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<AddIcon />}
                                     onClick={() => setIsMovieFormOpen(true)}
-                                >
-                                    Add Movie
-                                </Button>
+                            >
+                                Add Movie
+                            </Button>
                             )
                         ) : (
                             isMobile ? (
@@ -168,15 +168,15 @@ function App() {
                                 >
                                     <AddIcon />
                                 </IconButton>
-                            ) : (
-                                <Button
-                                    variant="contained"
-                                    startIcon={<AddIcon />}
+                        ) : (
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
                                     onClick={() => setIsShowFormOpen(true)}
                                     sx={{ ml: 2 }}
-                                >
+                            >
                                     Add TV Show
-                                </Button>
+                            </Button>
                             )
                         )}
                     </Toolbar>
