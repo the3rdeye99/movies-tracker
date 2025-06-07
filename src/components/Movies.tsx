@@ -19,7 +19,13 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
     const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
+    const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success' as 'success' | 'error'
+    });
 
     const fetchMovies = async () => {
         try {
@@ -40,66 +46,97 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
         fetchMovies();
     }, []);
 
+    // Add event listener for movie added
+    useEffect(() => {
+        const handleMovieAdded = () => {
+            fetchMovies();
+        };
+
+        window.addEventListener('movie-added', handleMovieAdded);
+        return () => {
+            window.removeEventListener('movie-added', handleMovieAdded);
+        };
+    }, []);
+
     const handleSearch = (query: string) => {
         if (!query.trim()) {
             setFilteredMovies(movies);
             return;
         }
-        const searchTerm = query.toLowerCase();
-        const filtered = movies.filter(movie => 
-            movie.title.toLowerCase().includes(searchTerm)
+        const filtered = movies.filter(movie =>
+            movie.title.toLowerCase().includes(query.toLowerCase())
         );
         setFilteredMovies(filtered);
     };
 
-    const handleAddMovie = async (movieData: MovieFormData) => {
-        try {
-            await addMovie(movieData);
-            fetchMovies();
-            onFormClose();
-            if (onMovieAdded) {
-                onMovieAdded();
-            }
-        } catch (error) {
-            console.error('Error adding movie:', error);
-        }
+    const handleEdit = (movie: Movie) => {
+        setSelectedMovie(movie);
     };
 
-    const handleEditMovie = async (movieData: MovieFormData) => {
-        if (!editingMovie) return;
-        try {
-            await updateMovie(editingMovie.id, movieData);
-            fetchMovies();
-            setEditingMovie(null);
-            onFormClose();
-            if (onMovieAdded) {
-                onMovieAdded();
-            }
-        } catch (error) {
-            console.error('Error updating movie:', error);
-        }
-    };
-
-    const handleDeleteMovie = async (id: number) => {
+    const handleDelete = async (id: number) => {
         try {
             await deleteMovie(id);
-            fetchMovies();
-            if (onMovieAdded) {
-                onMovieAdded();
-            }
-        } catch (error) {
-            console.error('Error deleting movie:', error);
+            await fetchMovies();
+            setSnackbar({
+                open: true,
+                message: 'Movie deleted successfully!',
+                severity: 'success'
+            });
+        } catch (err) {
+            console.error('Error deleting movie:', err);
+            setSnackbar({
+                open: true,
+                message: 'Failed to delete movie. Please try again.',
+                severity: 'error'
+            });
         }
     };
 
-    const handleFormClose = () => {
-        onFormClose();
-        setEditingMovie(null);
+    const handleFormSubmit = async (movieData: MovieFormData) => {
+        try {
+            if (selectedMovie) {
+                await updateMovie(selectedMovie.id, movieData);
+                setSnackbar({
+                    open: true,
+                    message: 'Movie updated successfully!',
+                    severity: 'success'
+                });
+            } else {
+                await addMovie(movieData);
+                setSnackbar({
+                    open: true,
+                    message: 'Movie added successfully!',
+                    severity: 'success'
+                });
+            }
+            await fetchMovies();
+            onFormClose();
+            setSelectedMovie(null);
+            if (onMovieAdded) {
+                onMovieAdded();
+            }
+        } catch (err) {
+            console.error('Error submitting movie:', err);
+            setSnackbar({
+                open: true,
+                message: 'Failed to submit movie. Please try again.',
+                severity: 'error'
+            });
+        }
+    };
+
+    const handleMovieClick = (movie: Movie) => {
+        setSelectedMovie(movie);
+        setIsDetailsOpen(true);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
     };
 
     if (loading) {
         return (
-            <Box sx={{ p: 4, textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                 <Typography>Loading movies...</Typography>
             </Box>
         );
@@ -114,51 +151,47 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
     }
 
     return (
-        <Box sx={{ p: { xs: 0, sm: 3 } }}>
+        <Box>
             <SearchComponent onSearch={handleSearch} />
-            {filteredMovies.length === 0 ? (
-                <Box sx={{ p: 4, textAlign: 'center' }}>
-                    <Typography>No movies found. Add your first movie!</Typography>
-                </Box>
-            ) : (
-                <MovieList
-                    movies={filteredMovies}
-                    onEdit={(movie) => {
-                        setEditingMovie(movie);
-                        onFormClose();
-                    }}
-                    onDelete={handleDeleteMovie}
-                />
-            )}
-            <RecommendedMovies onMovieAdded={fetchMovies} />
+            <MovieList
+                movies={filteredMovies}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+            />
+            <RecommendedMovies onMovieAdded={() => {
+                fetchMovies();
+                if (onMovieAdded) {
+                    onMovieAdded();
+                }
+            }} />
             <Dialog
-                open={isFormOpen || editingMovie !== null}
-                onClose={handleFormClose}
+                open={isFormOpen}
+                onClose={onFormClose}
                 maxWidth="md"
                 fullWidth
             >
                 <DialogTitle>
-                    {editingMovie ? 'Update Movie' : 'Add Movie'}
+                    {selectedMovie ? 'Edit Movie' : 'Add Movie'}
                     <IconButton
-                        aria-label="close"
-                        onClick={handleFormClose}
-                        sx={{
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                        }}
+                        onClick={onFormClose}
+                        sx={{ position: 'absolute', right: 8, top: 8 }}
                     >
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
                     <MovieForm
-                        open={isFormOpen || editingMovie !== null}
-                        onClose={handleFormClose}
-                        onSubmit={editingMovie ? handleEditMovie : handleAddMovie}
-                        initialData={editingMovie || undefined}
-                        isEditing={!!editingMovie}
-                        onMovieAdded={fetchMovies}
+                        open={isFormOpen}
+                        onClose={onFormClose}
+                        onSubmit={handleFormSubmit}
+                        initialData={selectedMovie || undefined}
+                        isEditing={!!selectedMovie}
+                        onMovieAdded={() => {
+                            fetchMovies();
+                            if (onMovieAdded) {
+                                onMovieAdded();
+                            }
+                        }}
                     />
                 </DialogContent>
             </Dialog>

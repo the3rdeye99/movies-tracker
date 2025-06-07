@@ -12,16 +12,14 @@ import {
     MenuItem,
     Box,
     Typography,
-    CircularProgress
-} from '@mui/material';
-import { Movie, MovieFormData } from '../types';
-import { searchTMDBTV, addTVShow } from '../services/api';
-import {
+    CircularProgress,
     Rating,
     SelectChangeEvent,
     InputAdornment,
     IconButton,
 } from '@mui/material';
+import { Movie, MovieFormData } from '../types';
+import { searchTMDBTV, addTVShow } from '../services/api';
 import SearchIcon from '@mui/icons-material/Search';
 
 interface TVShowFormProps {
@@ -68,21 +66,21 @@ const TVShowForm: React.FC<TVShowFormProps> = ({
     const handleSearch = async () => {
         if (!formData.title || isEditing) return;
 
-                    setIsSearching(true);
-                    try {
+        setIsSearching(true);
+        try {
             const tmdbData = await searchTMDBTV(formData.title);
-                        setFormData(prev => ({
-                            ...prev,
+            setFormData(prev => ({
+                ...prev,
                 title: tmdbData.title || prev.title,
-                            year: tmdbData.year ? parseInt(tmdbData.year) : null,
-                            poster_url: tmdbData.poster_url,
-                            overview: tmdbData.overview,
-                        }));
-                    } catch (error) {
-                        console.error('Error fetching TMDB data:', error);
-                    } finally {
-                        setIsSearching(false);
-                    }
+                year: tmdbData.year ? parseInt(tmdbData.year) : null,
+                poster_url: tmdbData.poster_url,
+                overview: tmdbData.overview,
+            }));
+        } catch (error) {
+            console.error('Error fetching TMDB data:', error);
+        } finally {
+            setIsSearching(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -108,9 +106,6 @@ const TVShowForm: React.FC<TVShowFormProps> = ({
     };
 
     return (
-        <Dialog open={open} onClose={onClose}>
-            <DialogTitle>{isEditing ? 'Update TV Show' : 'Add TV Show'}</DialogTitle>
-            <DialogContent>
         <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
             <TextField
                 fullWidth
@@ -120,21 +115,21 @@ const TVShowForm: React.FC<TVShowFormProps> = ({
                 onChange={handleInputChange}
                 required
                 margin="normal"
-                        disabled={isSearching || isEditing}
-                        InputProps={{
-                            endAdornment: !isEditing && (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        onClick={handleSearch}
-                                        disabled={isSearching || !formData.title}
-                                        edge="end"
-                                    >
-                                        {isSearching ? <CircularProgress size={20} /> : <SearchIcon />}
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                disabled={isSearching || isEditing}
+                InputProps={{
+                    endAdornment: !isEditing && (
+                        <InputAdornment position="end">
+                            <IconButton
+                                onClick={handleSearch}
+                                disabled={isSearching || !formData.title}
+                                edge="end"
+                            >
+                                {isSearching ? <CircularProgress size={20} /> : <SearchIcon />}
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                }}
+            />
 
             {formData.poster_url && (
                 <Box sx={{ mb: 2, textAlign: 'center' }}>
@@ -209,11 +204,6 @@ const TVShowForm: React.FC<TVShowFormProps> = ({
                 {isEditing ? 'Update TV Show' : 'Add TV Show'}
             </Button>
         </Box>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
-            </DialogActions>
-        </Dialog>
     );
 };
 

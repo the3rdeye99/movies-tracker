@@ -72,7 +72,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                     display: 'flex', 
                     flexDirection: 'column',
                     width: '100%',
-                    maxWidth: { xs: '100%', sm: isRecommended ? '240px' : '400px' },
+                    maxWidth: { xs: '100%', sm: '400px' },
                     margin: '0 auto',
                     transition: 'transform 0.2s ease-in-out',
                     cursor: 'pointer',
@@ -85,7 +85,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
             >
                 {movie.poster_url ? (
                     <Box sx={{ 
-                        height: { xs: 'auto', sm: isRecommended ? '360px' : '500px' },
+                        height: { xs: 'auto', sm: 500 },
                         aspectRatio: { xs: '2/3', sm: 'auto' }
                     }}>
                         <CardMedia
@@ -99,7 +99,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                 ) : (
                     <Box
                         sx={{
-                            height: { xs: 'auto', sm: isRecommended ? '360px' : '500px' },
+                            height: { xs: 'auto', sm: 500 },
                             aspectRatio: { xs: '2/3', sm: 'auto' },
                             display: 'flex',
                             alignItems: 'center',

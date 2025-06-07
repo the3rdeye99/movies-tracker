@@ -26,17 +26,19 @@ const MovieList: React.FC<MovieListProps> = ({ movies, onEdit, onDelete }) => {
                 sx={{
                     display: 'grid',
                     gridTemplateColumns: {
-                        xs: 'repeat(2, 1fr)',
+                        xs: 'repeat(1, 1fr)',
                         sm: 'repeat(2, 1fr)',
                         md: 'repeat(3, 1fr)',
+                        lg: 'repeat(4, 1fr)',
                         xl: 'repeat(5, 1fr)'
                     },
-                    gap: { xs: 1, sm: 2, md: 3 },
+                    gap: { xs: 2, sm: 2, md: 3 },
                     width: '100%',
                     justifyContent: 'center',
                     '& > *': {
                         display: 'flex',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        width: '100%'
                     }
                 }}
             >

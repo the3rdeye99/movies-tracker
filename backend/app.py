@@ -32,9 +32,16 @@ CORS(app,
 app.config['MONGODB_SETTINGS'] = {
     'host': os.getenv('MONGODB_URI', 'mongodb+srv://oluwatobi0112:W3bD3v3lop3r_99*@movie-tracker.l9rhnfa.mongodb.net/?retryWrites=true&w=majority&appName=movie-tracker'),
     'db': 'movie-tracker',
-    'alias': 'default'
+    'alias': 'default',
+    'connect': False  # Add this to prevent connection on startup
 }
-db = MongoEngine(app)
+
+try:
+    db = MongoEngine(app)
+    logger.info("MongoDB connection initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize MongoDB connection: {str(e)}")
+    raise
 
 # TMDB API configuration
 TMDB_API_KEY = os.getenv('TMDB_API_KEY')
@@ -166,6 +173,8 @@ def test_db():
 def add_movie():
     data = request.json
     try:
+        # Remove profile_id if present
+        data.pop('profile_id', None)
         movie = Movie(
             title=data['title'],
             year=data.get('year'),
@@ -191,6 +200,8 @@ def update_movie(id):
         return jsonify({'error': 'Movie not found'}), 404
     
     data = request.json
+    # Remove profile_id if present
+    data.pop('profile_id', None)
     logger.info(f"Update data received: {data}")
     try:
         # Fields that should not be updated
@@ -320,15 +331,31 @@ def search_tmdb_tv():
 @app.route('/api/tvshows', methods=['GET'])
 def get_tvshows():
     try:
+        logger.info("Fetching all TV shows from database")
         tvshows = TVShow.objects.all()
-        return jsonify([tvshow.to_dict() for tvshow in tvshows])
+        logger.info(f"Query executed successfully, found {tvshows.count()} TV shows")
+        
+        tvshow_list = []
+        for tvshow in tvshows:
+            try:
+                tvshow_dict = tvshow.to_dict()
+                tvshow_list.append(tvshow_dict)
+            except Exception as e:
+                logger.error(f"Error converting TV show to dict: {str(e)}")
+                continue
+                
+        logger.info(f"Successfully converted {len(tvshow_list)} TV shows to dict")
+        return jsonify(tvshow_list)
     except Exception as e:
+        logger.error(f"Error fetching TV shows: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/tvshows', methods=['POST'])
 def add_tvshow():
     data = request.json
     try:
+        # Remove profile_id if present
+        data.pop('profile_id', None)
         tvshow = TVShow(
             title=data['title'],
             year=data.get('year'),
@@ -350,7 +377,8 @@ def update_tvshow(tvshow_id):
     try:
         tvshow = TVShow.objects.get(id=tvshow_id)
         data = request.json
-        
+        # Remove profile_id if present
+        data.pop('profile_id', None)
         tvshow.title = data.get('title', tvshow.title)
         tvshow.year = data.get('year', tvshow.year)
         tvshow.poster_url = data.get('poster_url', tvshow.poster_url)
@@ -360,7 +388,6 @@ def update_tvshow(tvshow_id):
         tvshow.status = data.get('status', tvshow.status)
         tvshow.recommendation = data.get('recommendation', tvshow.recommendation)
         tvshow.updated_at = datetime.utcnow()
-        
         tvshow.save()
         return jsonify(tvshow.to_dict())
     except Exception as e:

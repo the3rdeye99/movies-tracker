@@ -52,6 +52,18 @@ const TVShows: React.FC = () => {
         fetchShows();
     }, []);
 
+    // Add event listener for TV show added
+    useEffect(() => {
+        const handleTVShowAdded = () => {
+            fetchShows();
+        };
+
+        window.addEventListener('tvshow-added', handleTVShowAdded);
+        return () => {
+            window.removeEventListener('tvshow-added', handleTVShowAdded);
+        };
+    }, []);
+
     const handleSearch = (query: string) => {
         if (!query.trim()) {
             setFilteredShows(shows);
@@ -76,54 +88,47 @@ const TVShows: React.FC = () => {
     const handleDelete = async (id: number) => {
         try {
             await deleteTVShow(id);
-            setShows(shows.filter(show => show.id !== id));
-            setFilteredShows(filteredShows.filter(show => show.id !== id));
+            await fetchShows();
             setSnackbar({
                 open: true,
-                message: 'TV show deleted successfully',
+                message: 'TV show deleted successfully!',
                 severity: 'success'
             });
         } catch (err) {
             console.error('Error deleting TV show:', err);
             setSnackbar({
                 open: true,
-                message: 'Failed to delete TV show',
+                message: 'Failed to delete TV show. Please try again.',
                 severity: 'error'
             });
         }
     };
 
-    const handleFormSubmit = async (formData: MovieFormData) => {
+    const handleFormSubmit = async (showData: MovieFormData) => {
         try {
             if (selectedShow) {
-                const updatedShow = await updateTVShow(selectedShow.id, formData);
-                setShows(shows.map(show => 
-                    show.id === selectedShow.id ? updatedShow : show
-                ));
-                setFilteredShows(filteredShows.map(show =>
-                    show.id === selectedShow.id ? updatedShow : show
-                ));
+                await updateTVShow(selectedShow.id, showData);
                 setSnackbar({
                     open: true,
-                    message: 'TV show updated successfully',
+                    message: 'TV show updated successfully!',
                     severity: 'success'
                 });
             } else {
-                const newShow = await addTVShow(formData);
-                setShows([...shows, newShow]);
-                setFilteredShows([...filteredShows, newShow]);
+                await addTVShow(showData);
                 setSnackbar({
                     open: true,
-                    message: 'TV show added successfully',
+                    message: 'TV show added successfully!',
                     severity: 'success'
                 });
             }
+            await fetchShows();
             setIsFormOpen(false);
+            setSelectedShow(null);
         } catch (err) {
-            console.error('Error saving TV show:', err);
+            console.error('Error submitting TV show:', err);
             setSnackbar({
                 open: true,
-                message: 'Failed to save TV show',
+                message: 'Failed to submit TV show. Please try again.',
                 severity: 'error'
             });
         }
@@ -158,8 +163,8 @@ const TVShows: React.FC = () => {
         <Box sx={{ p: { xs: 0, sm: 3 } }}>
             <SearchComponent onSearch={handleSearch} />
             {filteredShows.length === 0 ? (
-                <Typography align="center" color="text.secondary" sx={{ mt: 4 }}>
-                    No TV shows found
+                <Typography align="center" color="white" sx={{ mt: 4 }}>
+                    No TV shows found. Add your first show!
                 </Typography>
             ) : (
                 <TVShowList
@@ -171,14 +176,46 @@ const TVShows: React.FC = () => {
             )}
             <RecommendedTVShows onShowAdded={fetchShows} />
 
-            <TVShowForm
-                open={isFormOpen}
-                onClose={() => setIsFormOpen(false)}
-                onSubmit={handleFormSubmit}
-                initialData={selectedShow || undefined}
-                isEditing={!!selectedShow}
-                onShowAdded={fetchShows}
-            />
+            <Dialog
+                open={isFormOpen || selectedShow !== null}
+                onClose={() => {
+                    setIsFormOpen(false);
+                    setSelectedShow(null);
+                }}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    {selectedShow ? 'Update TV Show' : 'Add TV Show'}
+                    <IconButton
+                        aria-label="close"
+                        onClick={() => {
+                            setIsFormOpen(false);
+                            setSelectedShow(null);
+                        }}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <TVShowForm
+                        open={isFormOpen || selectedShow !== null}
+                        onClose={() => {
+                            setIsFormOpen(false);
+                            setSelectedShow(null);
+                        }}
+                        onSubmit={handleFormSubmit}
+                        initialData={selectedShow || undefined}
+                        isEditing={!!selectedShow}
+                        onShowAdded={fetchShows}
+                    />
+                </DialogContent>
+            </Dialog>
 
             {selectedShow && (
                 <TVShowDetails

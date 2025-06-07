@@ -78,18 +78,37 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                 type: 'tv'
             };
 
-            await addTVShow(showData);
-            onShowAdded();
-            // Remove the added show from recommendations
+            // Optimistically update the UI
             setRecommendations(prev => prev.filter(s => s.id !== show.id));
-            // Update current shows list
-            fetchCurrentShows();
+            setCurrentShows(prev => [...prev, { ...show, ...showData }]);
+            
+            // Trigger parent update immediately
+            onShowAdded();
+            window.dispatchEvent(new CustomEvent('tvshow-added'));
+
+            // Show success message
             setSnackbar({
                 open: true,
                 message: 'TV show added successfully!',
                 severity: 'success'
             });
+
+            // Make API call in the background
+            await addTVShow(showData);
+            
+            // Refresh data in the background
+            Promise.all([
+                fetchCurrentShows(),
+                fetchRecommendations()
+            ]).catch(err => {
+                console.error('Error refreshing data:', err);
+            });
+
         } catch (err) {
+            // Revert optimistic update on error
+            setRecommendations(prev => [...prev, show]);
+            setCurrentShows(prev => prev.filter(s => s.id !== show.id));
+            
             console.error('Error adding TV show:', err);
             setSnackbar({
                 open: true,
@@ -132,7 +151,11 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
     if (error) {
         return (
             <Box sx={{ p: 4, textAlign: 'center' }}>
-                <Typography color="error">{error}</Typography>
+                <Typography color="error">
+                    {error === 'Failed to fetch TV show recommendations'
+                        ? 'Please add at least three TV shows to your watchlist to receive personalized recommendations.'
+                        : error}
+                </Typography>
             </Box>
         );
     }
@@ -140,7 +163,9 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
     if (recommendations.length === 0) {
         return (
             <Box sx={{ p: 4, textAlign: 'center' }}>
-                <Typography>No TV show recommendations available</Typography>
+                <Typography>
+                    Add at least three TV shows to your watchlist to receive personalized recommendations!
+                </Typography>
             </Box>
         );
     }
@@ -163,40 +188,45 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                     No recommendations available at the moment.
                 </Typography>
             ) : (
-            <Box sx={{ position: 'relative' }}>
-                <Box
-                    ref={scrollContainerRef}
-                    sx={{
-                        display: 'flex',
-                        overflowX: 'auto',
+                <Box sx={{ position: 'relative' }}>
+                    <Box
+                        ref={scrollContainerRef}
+                        sx={{
+                            display: 'flex',
+                            overflowX: 'auto',
                             scrollBehavior: 'smooth',
                             scrollbarWidth: 'none',
                             msOverflowStyle: 'none',
-                        '&::-webkit-scrollbar': {
-                            display: 'none'
-                        },
-                        gap: 2,
-                        px: { xs: 4, sm: 6, md: 8 },
-                        py: 2,
-                        '& > *': { flexShrink: 0 }
-                    }}
-                >
-                    {recommendations.map((show) => (
-                        <Box
-                            key={show.id}
-                            sx={{
-                                width: '240px'
-                            }}
-                        >
+                            '&::-webkit-scrollbar': {
+                                display: 'none'
+                            },
+                            gap: 3,
+                            pb: 2
+                        }}
+                    >
+                        {recommendations.map((show) => (
+                            <Box
+                                key={`recommended-show-${show.id}-${show.title}`}
+                                sx={{
+                                    flex: '0 0 auto',
+                                    width: {
+                                        xs: '100%',
+                                        sm: 'calc(50% - 12px)',
+                                        md: 'calc(33.333% - 16px)',
+                                        lg: 'calc(25% - 18px)',
+                                        xl: 'calc(20% - 19.2px)'
+                                    }
+                                }}
+                            >
                                 <TVShowCard
                                     show={show}
-                                onEdit={handleAdd}
-                                onDelete={() => {}}
-                                isRecommended={true}
-                            />
-                        </Box>
-                    ))}
-                </Box>
+                                    onEdit={handleAdd}
+                                    onDelete={() => {}}
+                                    isRecommended={true}
+                                />
+                            </Box>
+                        ))}
+                    </Box>
                     {!isMobile && (
                         <>
                             <IconButton
@@ -235,7 +265,7 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                             </IconButton>
                         </>
                     )}
-            </Box>
+                </Box>
             )}
             <Snackbar
                 open={snackbar.open}

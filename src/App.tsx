@@ -70,6 +70,8 @@ function App() {
         try {
             await addMovie(movieData);
             setIsMovieFormOpen(false);
+            setActiveTab(prev => prev === 'movies' ? 'tvshows' : 'movies');
+            setTimeout(() => setActiveTab('movies'), 0);
         } catch (error) {
             console.error('Error adding movie:', error);
         }
@@ -79,6 +81,12 @@ function App() {
         try {
             await addTVShow(showData);
             setIsShowFormOpen(false);
+            setActiveTab(prev => prev === 'tvshows' ? 'movies' : 'tvshows');
+            setTimeout(() => {
+                setActiveTab('tvshows');
+                const event = new CustomEvent('tvshow-added');
+                window.dispatchEvent(event);
+            }, 0);
         } catch (error) {
             console.error('Error adding TV show:', error);
         }
