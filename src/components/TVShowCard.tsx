@@ -58,7 +58,7 @@ const TVShowCard: React.FC<TVShowCardProps> = ({
         if (onShowClick) {
             onShowClick(show);
         } else {
-            setShowDetails(true);
+        setShowDetails(true);
         }
     };
 
@@ -95,7 +95,7 @@ const TVShowCard: React.FC<TVShowCardProps> = ({
                     display: 'flex', 
                     flexDirection: 'column',
                     width: '100%',
-                    maxWidth: { xs: '100%', sm: '400px' },
+                    maxWidth: { xs: '100%', sm: isRecommended ? '240px' : '400px' },
                     margin: '0 auto',
                     transition: 'transform 0.2s ease-in-out',
                     cursor: 'pointer',
@@ -108,7 +108,7 @@ const TVShowCard: React.FC<TVShowCardProps> = ({
             >
                 {show.poster_url ? (
                     <Box sx={{ 
-                        height: { xs: 'auto', sm: 500 },
+                        height: { xs: 'auto', sm: isRecommended ? '360px' : '500px' },
                         aspectRatio: { xs: '2/3', sm: 'auto' }
                     }}>
                         <CardMedia
@@ -122,7 +122,7 @@ const TVShowCard: React.FC<TVShowCardProps> = ({
                 ) : (
                     <Box
                         sx={{
-                            height: { xs: 'auto', sm: 500 },
+                            height: { xs: 'auto', sm: isRecommended ? '360px' : '500px' },
                             aspectRatio: { xs: '2/3', sm: 'auto' },
                             display: 'flex',
                             alignItems: 'center',

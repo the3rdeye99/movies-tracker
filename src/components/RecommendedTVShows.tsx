@@ -175,22 +175,17 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                         '&::-webkit-scrollbar': {
                             display: 'none'
                         },
-                            gap: 3,
-                            pb: 2
+                        gap: 2,
+                        px: { xs: 4, sm: 6, md: 8 },
+                        py: 2,
+                        '& > *': { flexShrink: 0 }
                     }}
                 >
                     {recommendations.map((show) => (
                         <Box
                             key={show.id}
                             sx={{
-                                flex: '0 0 auto',
-                                    width: {
-                                        xs: '100%',
-                                        sm: 'calc(50% - 12px)',
-                                        md: 'calc(33.333% - 16px)',
-                                        lg: 'calc(25% - 18px)',
-                                        xl: 'calc(20% - 19.2px)'
-                                    }
+                                width: '240px'
                             }}
                         >
                                 <TVShowCard

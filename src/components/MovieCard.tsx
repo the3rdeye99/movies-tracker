@@ -71,7 +71,8 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                     height: '100%', 
                     display: 'flex', 
                     flexDirection: 'column',
-                    maxWidth: { xs: '100%', sm: '320px' },
+                    width: '100%',
+                    maxWidth: { xs: '100%', sm: isRecommended ? '240px' : '400px' },
                     margin: '0 auto',
                     transition: 'transform 0.2s ease-in-out',
                     cursor: 'pointer',
@@ -83,7 +84,10 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                 onClick={handleCardClick}
             >
                 {movie.poster_url ? (
-                    <Box sx={{ height: { xs: 280, sm: 400 } }}>
+                    <Box sx={{ 
+                        height: { xs: 'auto', sm: isRecommended ? '360px' : '500px' },
+                        aspectRatio: { xs: '2/3', sm: 'auto' }
+                    }}>
                         <CardMedia
                             component="img"
                             height="100%"
@@ -95,7 +99,8 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                 ) : (
                     <Box
                         sx={{
-                            height: { xs: 280, sm: 400 },
+                            height: { xs: 'auto', sm: isRecommended ? '360px' : '500px' },
+                            aspectRatio: { xs: '2/3', sm: 'auto' },
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -112,14 +117,14 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                     position: 'relative', 
                     display: 'flex', 
                     flexDirection: 'column',
-                    p: { xs: 1, sm: 2 },
-                    minHeight: { xs: '100px', sm: '120px' }
+                    p: { xs: 2, sm: 3 },
+                    minHeight: { xs: 'auto', sm: '160px' }
                 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
                         <Typography variant="h6" component="div" sx={{ 
-                            fontSize: { xs: '1rem', sm: '1.2rem' },
+                            fontSize: { xs: '1.1rem', sm: '1.4rem' },
                             fontWeight: 'bold',
-                            height: { xs: '2em', sm: '2.4em' },
+                            height: { xs: 'auto', sm: '2.4em' },
                             overflow: 'hidden',
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
