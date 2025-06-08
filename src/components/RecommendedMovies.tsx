@@ -189,6 +189,22 @@ const RecommendedMovies: React.FC<RecommendedMoviesProps> = ({ onMovieAdded }) =
                 </Typography>
             ) : (
                 <Box sx={{ position: 'relative' }}>
+                    <IconButton
+                        onClick={handleScrollLeft}
+                        sx={{
+                            position: 'absolute',
+                            left: -20,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            bgcolor: 'background.paper',
+                            boxShadow: 1,
+                            '&:hover': { bgcolor: 'background.paper' },
+                            zIndex: 1,
+                            display: { xs: 'none', sm: 'flex' }
+                        }}
+                    >
+                        <ChevronLeft />
+                    </IconButton>
                     <Box
                         ref={scrollContainerRef}
                         sx={{
@@ -227,6 +243,22 @@ const RecommendedMovies: React.FC<RecommendedMoviesProps> = ({ onMovieAdded }) =
                             </Box>
                         ))}
                     </Box>
+                    <IconButton
+                        onClick={handleScrollRight}
+                        sx={{
+                            position: 'absolute',
+                            right: -20,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            bgcolor: 'background.paper',
+                            boxShadow: 1,
+                            '&:hover': { bgcolor: 'background.paper' },
+                            zIndex: 1,
+                            display: { xs: 'none', sm: 'flex' }
+                        }}
+                    >
+                        <ChevronRight />
+                    </IconButton>
                 </Box>
             )}
             <Snackbar

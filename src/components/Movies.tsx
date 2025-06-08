@@ -4,6 +4,7 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import MovieList from './MovieList';
 import MovieForm from './MovieForm';
 import SearchComponent from './SearchComponent';
+import CategoryFilter from './CategoryFilter';
 import { Movie, MovieFormData } from '../types';
 import { getMovies, addMovie, updateMovie, deleteMovie } from '../services/api';
 import RecommendedMovies from './RecommendedMovies';
@@ -17,6 +18,8 @@ interface MoviesProps {
 const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }) => {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState<string>('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
@@ -60,13 +63,30 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
     }, []);
 
     const handleSearch = (query: string) => {
-        if (!query.trim()) {
-            setFilteredMovies(movies);
-            return;
+        setSearchQuery(query);
+        filterMovies(query, selectedCategory);
+    };
+
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category);
+        filterMovies(searchQuery, category);
+    };
+
+    const filterMovies = (query: string, category: string) => {
+        let filtered = movies;
+
+        // Apply search filter
+        if (query.trim()) {
+            filtered = filtered.filter(movie =>
+                movie.title.toLowerCase().includes(query.toLowerCase())
+            );
         }
-        const filtered = movies.filter(movie =>
-            movie.title.toLowerCase().includes(query.toLowerCase())
-        );
+
+        // Apply category filter
+        if (category !== 'all') {
+            filtered = filtered.filter(movie => movie.status === category);
+        }
+
         setFilteredMovies(filtered);
     };
 
@@ -159,7 +179,13 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
 
     return (
         <Box>
-            <SearchComponent onSearch={handleSearch} />
+            <Box sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'background.paper', pb: 2 }}>
+                <SearchComponent onSearch={handleSearch} />
+                <CategoryFilter
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={handleCategoryChange}
+                />
+            </Box>
             <MovieList
                 movies={filteredMovies}
                 onEdit={handleEdit}

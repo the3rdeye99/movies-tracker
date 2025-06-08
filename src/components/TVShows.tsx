@@ -15,6 +15,7 @@ import TVShowList from './TVShowList';
 import TVShowForm from './TVShowForm';
 import TVShowDetails from './TVShowDetails';
 import SearchComponent from './SearchComponent';
+import CategoryFilter from './CategoryFilter';
 import { Movie, MovieFormData } from '../types';
 import { getTVShows, addTVShow, updateTVShow, deleteTVShow } from '../services/api';
 import RecommendedTVShows from './RecommendedTVShows';
@@ -22,6 +23,8 @@ import RecommendedTVShows from './RecommendedTVShows';
 const TVShows: React.FC = () => {
     const [shows, setShows] = useState<Movie[]>([]);
     const [filteredShows, setFilteredShows] = useState<Movie[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState<string>('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -66,13 +69,30 @@ const TVShows: React.FC = () => {
     }, []);
 
     const handleSearch = (query: string) => {
-        if (!query.trim()) {
-            setFilteredShows(shows);
-            return;
+        setSearchQuery(query);
+        filterShows(query, selectedCategory);
+    };
+
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category);
+        filterShows(searchQuery, category);
+    };
+
+    const filterShows = (query: string, category: string) => {
+        let filtered = shows;
+
+        // Apply search filter
+        if (query.trim()) {
+            filtered = filtered.filter(show =>
+                show.title.toLowerCase().includes(query.toLowerCase())
+            );
         }
-        const filtered = shows.filter(show =>
-            show.title.toLowerCase().includes(query.toLowerCase())
-        );
+
+        // Apply category filter
+        if (category !== 'all') {
+            filtered = filtered.filter(show => show.status === category);
+        }
+
         setFilteredShows(filtered);
     };
 
@@ -166,21 +186,23 @@ const TVShows: React.FC = () => {
     }
 
     return (
-        <Box sx={{ p: { xs: 0, sm: 3 } }}>
-            <SearchComponent onSearch={handleSearch} />
-            {filteredShows.length === 0 ? (
-                <Typography align="center" color="white" sx={{ mt: 4 }}>
-                    No TV shows found. Add your first show!
-                </Typography>
-            ) : (
-                <TVShowList
-                    shows={filteredShows}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onShowClick={handleShowClick}
+        <Box>
+            <Box sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'background.paper', pb: 2 }}>
+                <SearchComponent onSearch={handleSearch} />
+                <CategoryFilter
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={handleCategoryChange}
                 />
-            )}
-            <RecommendedTVShows onShowAdded={fetchShows} />
+            </Box>
+            <TVShowList
+                shows={filteredShows}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onShowClick={handleShowClick}
+            />
+            <RecommendedTVShows onShowAdded={() => {
+                fetchShows();
+            }} />
 
             <Dialog
                 open={isFormOpen}
