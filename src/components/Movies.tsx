@@ -21,6 +21,7 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
     const [error, setError] = useState<string | null>(null);
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [isEditFormOpen, setIsEditFormOpen] = useState(false);
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',
@@ -71,6 +72,12 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
 
     const handleEdit = (movie: Movie) => {
         setSelectedMovie(movie);
+        setIsEditFormOpen(true);
+    };
+
+    const handleEditFormClose = () => {
+        setIsEditFormOpen(false);
+        setSelectedMovie(null);
     };
 
     const handleDelete = async (id: number) => {
@@ -188,6 +195,39 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
                         isEditing={!!selectedMovie}
                         onMovieAdded={() => {
                             fetchMovies();
+                            if (onMovieAdded) {
+                                onMovieAdded();
+                            }
+                        }}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={isEditFormOpen}
+                onClose={handleEditFormClose}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    Edit Movie
+                    <IconButton
+                        onClick={handleEditFormClose}
+                        sx={{ position: 'absolute', right: 8, top: 8 }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <MovieForm
+                        open={isEditFormOpen}
+                        onClose={handleEditFormClose}
+                        onSubmit={handleFormSubmit}
+                        initialData={selectedMovie || undefined}
+                        isEditing={true}
+                        onMovieAdded={() => {
+                            fetchMovies();
+                            handleEditFormClose();
                             if (onMovieAdded) {
                                 onMovieAdded();
                             }

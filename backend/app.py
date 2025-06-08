@@ -88,6 +88,8 @@ class TVShow(db.Document):
     status = db.StringField(default='Want to Watch')  # 'Watched', 'Watching', 'Want to Watch'
     recommendation = db.StringField()
     tmdb_id = db.IntField()  # Add TMDB ID field
+    type = db.StringField(default='tv')  # Add type field
+    seasons = db.IntField()  # Add seasons field
     created_at = db.DateTimeField(default=datetime.utcnow)
     updated_at = db.DateTimeField(default=datetime.utcnow)
 
@@ -103,6 +105,8 @@ class TVShow(db.Document):
             'status': self.status,
             'recommendation': self.recommendation,
             'tmdb_id': self.tmdb_id,
+            'type': self.type,
+            'seasons': self.seasons,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
@@ -365,7 +369,9 @@ def add_tvshow():
             review=data.get('review'),
             status=data.get('status', 'Want to Watch'),
             recommendation=data.get('recommendation'),
-            tmdb_id=data.get('tmdb_id')
+            tmdb_id=data.get('tmdb_id'),
+            type=data.get('type', 'tv'),
+            seasons=data.get('seasons', 0)
         )
         tvshow.save()
         return jsonify(tvshow.to_dict()), 201
@@ -387,6 +393,8 @@ def update_tvshow(tvshow_id):
         tvshow.review = data.get('review', tvshow.review)
         tvshow.status = data.get('status', tvshow.status)
         tvshow.recommendation = data.get('recommendation', tvshow.recommendation)
+        tvshow.type = data.get('type', tvshow.type)
+        tvshow.seasons = data.get('seasons', tvshow.seasons)
         tvshow.updated_at = datetime.utcnow()
         tvshow.save()
         return jsonify(tvshow.to_dict())

@@ -25,6 +25,7 @@ const TVShows: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [isEditFormOpen, setIsEditFormOpen] = useState(false);
     const [selectedShow, setSelectedShow] = useState<Movie | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [snackbar, setSnackbar] = useState({
@@ -82,7 +83,12 @@ const TVShows: React.FC = () => {
 
     const handleEdit = (show: Movie) => {
         setSelectedShow(show);
-        setIsFormOpen(true);
+        setIsEditFormOpen(true);
+    };
+
+    const handleEditFormClose = () => {
+        setIsEditFormOpen(false);
+        setSelectedShow(null);
     };
 
     const handleDelete = async (id: number) => {
@@ -177,7 +183,7 @@ const TVShows: React.FC = () => {
             <RecommendedTVShows onShowAdded={fetchShows} />
 
             <Dialog
-                open={isFormOpen || selectedShow !== null}
+                open={isFormOpen}
                 onClose={() => {
                     setIsFormOpen(false);
                     setSelectedShow(null);
@@ -186,7 +192,7 @@ const TVShows: React.FC = () => {
                 fullWidth
             >
                 <DialogTitle>
-                    {selectedShow ? 'Update TV Show' : 'Add TV Show'}
+                    Add TV Show
                     <IconButton
                         aria-label="close"
                         onClick={() => {
@@ -204,14 +210,46 @@ const TVShows: React.FC = () => {
                 </DialogTitle>
                 <DialogContent>
                     <TVShowForm
-                        open={isFormOpen || selectedShow !== null}
+                        open={isFormOpen}
                         onClose={() => {
                             setIsFormOpen(false);
                             setSelectedShow(null);
                         }}
                         onSubmit={handleFormSubmit}
+                        initialData={undefined}
+                        isEditing={false}
+                        onShowAdded={fetchShows}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={isEditFormOpen}
+                onClose={handleEditFormClose}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    Edit TV Show
+                    <IconButton
+                        aria-label="close"
+                        onClick={handleEditFormClose}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <TVShowForm
+                        open={isEditFormOpen}
+                        onClose={handleEditFormClose}
+                        onSubmit={handleFormSubmit}
                         initialData={selectedShow || undefined}
-                        isEditing={!!selectedShow}
+                        isEditing={true}
                         onShowAdded={fetchShows}
                     />
                 </DialogContent>
