@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, IconButton, useTheme, useMediaQuery, CircularProgress, Snackbar, Alert } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight, Refresh as RefreshIcon } from '@mui/icons-material';
 import TVShowCard from './TVShowCard';
 import { Movie, MovieFormData } from '../types';
 import { getRecommendedTVShows, addTVShow, getTVShows } from '../services/api';
@@ -172,9 +172,21 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
 
     return (
         <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>
-                Recommended TV Shows
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="h5">
+                    Recommended TV Shows
+                </Typography>
+                <IconButton 
+                    onClick={fetchRecommendations}
+                    disabled={loading}
+                    sx={{ 
+                        color: 'primary.main',
+                        '&:hover': { color: 'primary.dark' }
+                    }}
+                >
+                    {loading ? <CircularProgress size={24} /> : <RefreshIcon />}
+                </IconButton>
+            </Box>
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <CircularProgress />
@@ -189,6 +201,22 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                 </Typography>
             ) : (
                 <Box sx={{ position: 'relative' }}>
+                    <IconButton
+                        onClick={handleScrollLeft}
+                        sx={{
+                            position: 'absolute',
+                            left: -20,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            bgcolor: 'background.paper',
+                            boxShadow: 1,
+                            '&:hover': { bgcolor: 'background.paper' },
+                            zIndex: 1,
+                            display: { xs: 'none', sm: 'flex' }
+                        }}
+                    >
+                        <ChevronLeft />
+                    </IconButton>
                     <Box
                         ref={scrollContainerRef}
                         sx={{
@@ -200,7 +228,7 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                             '&::-webkit-scrollbar': {
                                 display: 'none'
                             },
-                            gap: 3,
+                            gap: 2,
                             pb: 2
                         }}
                     >
@@ -210,11 +238,18 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                                 sx={{
                                     flex: '0 0 auto',
                                     width: {
+                                        xs: 'calc(100% - 16px)',
+                                        sm: 'calc(50% - 8px)',
+                                        md: 'calc(33.333% - 11px)',
+                                        lg: 'calc(25% - 12px)',
+                                        xl: 'calc(20% - 13px)'
+                                    },
+                                    maxWidth: {
                                         xs: '100%',
-                                        sm: 'calc(50% - 12px)',
-                                        md: 'calc(33.333% - 16px)',
-                                        lg: 'calc(25% - 18px)',
-                                        xl: 'calc(20% - 19.2px)'
+                                        sm: '300px',
+                                        md: '250px',
+                                        lg: '220px',
+                                        xl: '200px'
                                     }
                                 }}
                             >
@@ -227,44 +262,22 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                             </Box>
                         ))}
                     </Box>
-                    {!isMobile && (
-                        <>
-                            <IconButton
-                                onClick={handleScrollLeft}
-                                sx={{
-                                    position: 'absolute',
-                                    left: -20,
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    bgcolor: 'background.paper',
-                                    boxShadow: 1,
-                                    '&:hover': {
-                                        bgcolor: 'background.paper',
-                                        boxShadow: 2
-                                    }
-                                }}
-                            >
-                                <ChevronLeft />
-                            </IconButton>
-                            <IconButton
-                                onClick={handleScrollRight}
-                                sx={{
-                                    position: 'absolute',
-                                    right: -20,
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    bgcolor: 'background.paper',
-                                    boxShadow: 1,
-                                    '&:hover': {
-                                        bgcolor: 'background.paper',
-                                        boxShadow: 2
-                                    }
-                                }}
-                            >
-                                <ChevronRight />
-                            </IconButton>
-                        </>
-                    )}
+                    <IconButton
+                        onClick={handleScrollRight}
+                        sx={{
+                            position: 'absolute',
+                            right: -20,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            bgcolor: 'background.paper',
+                            boxShadow: 1,
+                            '&:hover': { bgcolor: 'background.paper' },
+                            zIndex: 1,
+                            display: { xs: 'none', sm: 'flex' }
+                        }}
+                    >
+                        <ChevronRight />
+                    </IconButton>
                 </Box>
             )}
             <Snackbar

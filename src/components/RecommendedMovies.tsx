@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, IconButton, useTheme, useMediaQuery, CircularProgress, Snackbar, Alert } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight, Refresh as RefreshIcon } from '@mui/icons-material';
 import MovieCard from './MovieCard';
 import { Movie, MovieFormData } from '../types';
 import { getRecommendedMovies, addMovie, getMovies } from '../services/api';
@@ -172,9 +172,21 @@ const RecommendedMovies: React.FC<RecommendedMoviesProps> = ({ onMovieAdded }) =
 
     return (
         <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>
-                Recommended Movies
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="h5">
+                    Recommended Movies
+                </Typography>
+                <IconButton 
+                    onClick={fetchRecommendations}
+                    disabled={loading}
+                    sx={{ 
+                        color: 'primary.main',
+                        '&:hover': { color: 'primary.dark' }
+                    }}
+                >
+                    {loading ? <CircularProgress size={24} /> : <RefreshIcon />}
+                </IconButton>
+            </Box>
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <CircularProgress />
@@ -216,7 +228,7 @@ const RecommendedMovies: React.FC<RecommendedMoviesProps> = ({ onMovieAdded }) =
                             '&::-webkit-scrollbar': {
                                 display: 'none'
                             },
-                            gap: 3,
+                            gap: 2,
                             pb: 2
                         }}
                     >
@@ -226,11 +238,18 @@ const RecommendedMovies: React.FC<RecommendedMoviesProps> = ({ onMovieAdded }) =
                                 sx={{
                                     flex: '0 0 auto',
                                     width: {
+                                        xs: 'calc(100% - 16px)',
+                                        sm: 'calc(50% - 8px)',
+                                        md: 'calc(33.333% - 11px)',
+                                        lg: 'calc(25% - 12px)',
+                                        xl: 'calc(20% - 13px)'
+                                    },
+                                    maxWidth: {
                                         xs: '100%',
-                                        sm: 'calc(50% - 12px)',
-                                        md: 'calc(33.333% - 16px)',
-                                        lg: 'calc(25% - 18px)',
-                                        xl: 'calc(20% - 19.2px)'
+                                        sm: '300px',
+                                        md: '250px',
+                                        lg: '220px',
+                                        xl: '200px'
                                     }
                                 }}
                             >
