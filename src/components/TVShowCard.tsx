@@ -95,10 +95,11 @@ const TVShowCard: React.FC<TVShowCardProps> = ({
                     display: 'flex', 
                     flexDirection: 'column',
                     width: '100%',
-                    maxWidth: { xs: '100%', sm: '400px' },
+                    maxWidth: { xs: '280px', sm: '400px' },
                     margin: '0 auto',
                     transition: 'transform 0.2s ease-in-out',
                     cursor: 'pointer',
+                    aspectRatio: '3/4',
                     '&:hover': {
                         transform: 'scale(1.02)',
                         boxShadow: 3
@@ -108,29 +109,36 @@ const TVShowCard: React.FC<TVShowCardProps> = ({
             >
                 {show.poster_url ? (
                     <Box sx={{ 
-                        height: { xs: 'auto', sm: 500 },
-                        aspectRatio: { xs: '2/3', sm: 'auto' }
+                        width: '100%',
+                        height: '75%',
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                     }}>
                         <CardMedia
                             component="img"
-                            height="100%"
                             image={show.poster_url}
                             alt={show.title}
-                            sx={{ objectFit: 'cover' }}
+                            sx={{ 
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'fill'
+                            }}
                         />
                     </Box>
                 ) : (
                     <Box
                         sx={{
-                            height: { xs: 'auto', sm: 500 },
-                            aspectRatio: { xs: '2/3', sm: 'auto' },
+                            width: '100%',
+                            height: '75%',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             bgcolor: 'grey.200',
                         }}
                     >
-                        <Typography variant="h6" color="text.secondary">
+                        <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
                             No Image Available
                         </Typography>
                     </Box>
@@ -140,12 +148,12 @@ const TVShowCard: React.FC<TVShowCardProps> = ({
                     position: 'relative', 
                     display: 'flex', 
                     flexDirection: 'column',
-                    p: { xs: 2, sm: 3 },
-                    minHeight: { xs: 'auto', sm: '160px' }
+                    p: { xs: 0.75, sm: 1.5 },
+                    height: '25%'
                 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-                        <Typography variant="h6" component="div" sx={{ 
-                            fontSize: { xs: '1.1rem', sm: '1.4rem' },
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
+                        <Typography variant="subtitle1" component="div" sx={{ 
+                            fontSize: { xs: '0.9rem', sm: '1rem' },
                             fontWeight: 'bold',
                             height: { xs: 'auto', sm: '2.4em' },
                             overflow: 'hidden',
@@ -169,47 +177,58 @@ const TVShowCard: React.FC<TVShowCardProps> = ({
                                     sx={{ 
                                         bgcolor: 'primary.main',
                                         color: 'white',
-                                        '&:hover': { bgcolor: 'primary.dark' }
+                                        '&:hover': { bgcolor: 'primary.dark' },
+                                        width: { xs: '28px', sm: '24px' },
+                                        height: { xs: '28px', sm: '24px' }
                                     }}
                                 >
-                                    <AddIcon />
+                                    <AddIcon sx={{ fontSize: { xs: '1.1rem', sm: '1rem' } }} />
                                 </IconButton>
                             ) : (
                                 <>
                                     <IconButton 
                                         size="small" 
                                         onClick={handleEditClick}
+                                        sx={{ width: { xs: '28px', sm: '24px' }, height: { xs: '28px', sm: '24px' } }}
                                     >
-                                        <EditIcon />
+                                        <EditIcon sx={{ fontSize: { xs: '1.1rem', sm: '1rem' } }} />
                                     </IconButton>
                                     <IconButton 
                                         size="small" 
                                         onClick={handleDeleteClick}
+                                        sx={{ width: { xs: '28px', sm: '24px' }, height: { xs: '28px', sm: '24px' } }}
                                     >
-                                        <DeleteIcon />
+                                        <DeleteIcon sx={{ fontSize: { xs: '1.1rem', sm: '1rem' } }} />
                                     </IconButton>
                                 </>
                             )}
                         </Box>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Rating value={show.rating || 0} readOnly size="medium" />
-                        {show.year && (
-                            <Typography variant="body1" color="text.secondary" sx={{ ml: 1 }}>
-                                ({show.year})
-                            </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Rating value={show.rating || 0} readOnly size="small" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }} />
+                            {show.year && (
+                                <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5, fontSize: { xs: '0.8rem', sm: '0.8rem' } }}>
+                                    ({show.year})
+                                </Typography>
+                            )}
+                        </Box>
+                        {show.status && !isRecommended && (
+                            <Chip 
+                                label={show.status} 
+                                size="small" 
+                                color={getStatusColor(show.status)}
+                                sx={{ 
+                                    height: { xs: '20px', sm: '20px' },
+                                    '& .MuiChip-label': {
+                                        fontSize: { xs: '0.7rem', sm: '0.7rem' },
+                                        px: 1
+                                    }
+                                }}
+                            />
                         )}
                     </Box>
-
-                    {show.status && !isRecommended && (
-                        <Chip 
-                            label={show.status} 
-                            size="small" 
-                            color={getStatusColor(show.status)}
-                            sx={{ mb: 1 }}
-                        />
-                    )}
                 </CardContent>
             </Card>
             <TVShowDetails
