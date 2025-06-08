@@ -78,8 +78,8 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
         // Apply search filter
         if (query.trim()) {
             filtered = filtered.filter(movie =>
-                movie.title.toLowerCase().includes(query.toLowerCase())
-            );
+            movie.title.toLowerCase().includes(query.toLowerCase())
+        );
         }
 
         // Apply category filter
@@ -180,7 +180,7 @@ const Movies: React.FC<MoviesProps> = ({ isFormOpen, onFormClose, onMovieAdded }
     return (
         <Box>
             <Box sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'background.paper', pb: 2 }}>
-                <SearchComponent onSearch={handleSearch} />
+            <SearchComponent onSearch={handleSearch} />
                 <CategoryFilter
                     selectedCategory={selectedCategory}
                     onCategoryChange={handleCategoryChange}

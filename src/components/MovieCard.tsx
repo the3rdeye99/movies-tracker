@@ -76,7 +76,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                     margin: '0 auto',
                     transition: 'transform 0.2s ease-in-out',
                     cursor: 'pointer',
-                    aspectRatio: '3/4',
+                    aspectRatio: '2/3',
                     '&:hover': {
                         transform: 'scale(1.02)',
                         boxShadow: 3
@@ -87,7 +87,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onEdit, onDelete, isRecomm
                 {movie.poster_url ? (
                     <Box sx={{ 
                         width: '100%',
-                        height: '75%',
+                        height: '80%',
                         position: 'relative',
                         display: 'flex',
                         alignItems: 'center',

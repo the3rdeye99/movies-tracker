@@ -174,8 +174,8 @@ const RecommendedMovies: React.FC<RecommendedMoviesProps> = ({ onMovieAdded }) =
         <Box sx={{ mt: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h5">
-                    Recommended Movies
-                </Typography>
+                Recommended Movies
+            </Typography>
                 <IconButton 
                     onClick={fetchRecommendations}
                     disabled={loading}

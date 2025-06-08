@@ -174,8 +174,8 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
         <Box sx={{ mt: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h5">
-                    Recommended TV Shows
-                </Typography>
+                Recommended TV Shows
+            </Typography>
                 <IconButton 
                     onClick={fetchRecommendations}
                     disabled={loading}
@@ -262,22 +262,22 @@ const RecommendedTVShows: React.FC<RecommendedTVShowsProps> = ({ onShowAdded }) 
                             </Box>
                         ))}
                     </Box>
-                    <IconButton
-                        onClick={handleScrollRight}
-                        sx={{
-                            position: 'absolute',
-                            right: -20,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            bgcolor: 'background.paper',
-                            boxShadow: 1,
+                            <IconButton
+                                onClick={handleScrollRight}
+                                sx={{
+                                    position: 'absolute',
+                                    right: -20,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    bgcolor: 'background.paper',
+                                    boxShadow: 1,
                             '&:hover': { bgcolor: 'background.paper' },
                             zIndex: 1,
                             display: { xs: 'none', sm: 'flex' }
-                        }}
-                    >
-                        <ChevronRight />
-                    </IconButton>
+                                }}
+                            >
+                                <ChevronRight />
+                            </IconButton>
                 </Box>
             )}
             <Snackbar

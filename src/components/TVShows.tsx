@@ -84,8 +84,8 @@ const TVShows: React.FC = () => {
         // Apply search filter
         if (query.trim()) {
             filtered = filtered.filter(show =>
-                show.title.toLowerCase().includes(query.toLowerCase())
-            );
+            show.title.toLowerCase().includes(query.toLowerCase())
+        );
         }
 
         // Apply category filter
@@ -188,18 +188,18 @@ const TVShows: React.FC = () => {
     return (
         <Box>
             <Box sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'background.paper', pb: 2 }}>
-                <SearchComponent onSearch={handleSearch} />
+            <SearchComponent onSearch={handleSearch} />
                 <CategoryFilter
                     selectedCategory={selectedCategory}
                     onCategoryChange={handleCategoryChange}
                 />
             </Box>
-            <TVShowList
-                shows={filteredShows}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onShowClick={handleShowClick}
-            />
+                <TVShowList
+                    shows={filteredShows}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onShowClick={handleShowClick}
+                />
             <RecommendedTVShows onShowAdded={() => {
                 fetchShows();
             }} />
